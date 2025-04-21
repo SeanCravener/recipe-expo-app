@@ -2,8 +2,20 @@ import { View, Text, Pressable, StyleSheet } from "react-native";
 import { useAuth } from "../../contexts/auth/AuthContext";
 import { useState } from "react";
 import { router } from "expo-router";
+import { ProtectedRoute } from "../../components/protected/ProtectedRoute";
+import { Permission } from "../../lib/permissions";
 
 export default function Profile() {
+  // Wrap the entire component content in ProtectedRoute
+  return (
+    <ProtectedRoute permission={Permission.VIEW_PROFILE}>
+      <ProfileContent />
+    </ProtectedRoute>
+  );
+}
+
+// Separate the content into its own component
+function ProfileContent() {
   const { session, signOut } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,16 +35,10 @@ export default function Profile() {
     }
   };
 
-  // Redirect if no session (this is a backup to the tab navigator protection)
-  if (!session) {
-    router.replace("/sign-in");
-    return null;
-  }
-
   return (
     <View style={styles.container}>
       {error && <Text style={styles.errorText}>{error}</Text>}
-      <Text style={styles.text}>Welcome, {session.user.id}</Text>
+      <Text style={styles.text}>Welcome, {session?.user.id}</Text>
       <Pressable
         style={[styles.button, isLoading && styles.buttonDisabled]}
         onPress={handleSignOut}

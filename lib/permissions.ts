@@ -1,0 +1,19 @@
+export enum Permission {
+  VIEW_ITEMS = "VIEW_ITEMS",
+  FAVORITE_ITEM = "FAVORITE_ITEM",
+  CREATE_ITEM = "CREATE_ITEM",
+  EDIT_ITEM = "EDIT_ITEM",
+  RATE_ITEM = "RATE_ITEM",
+  VIEW_PROFILE = "VIEW_PROFILE",
+}
+
+export const PUBLIC_PERMISSIONS = [Permission.VIEW_ITEMS];
+
+export const AUTHENTICATED_PERMISSIONS = [
+  ...PUBLIC_PERMISSIONS,
+  Permission.FAVORITE_ITEM,
+  Permission.CREATE_ITEM,
+  Permission.EDIT_ITEM,
+  Permission.RATE_ITEM,
+  Permission.VIEW_PROFILE,
+];
