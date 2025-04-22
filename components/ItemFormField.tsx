@@ -1,5 +1,5 @@
 import { View, Text, TextInput, StyleSheet } from "react-native";
-import { Controller, Control } from "react-hook-form";
+import { Control, Controller } from "react-hook-form";
 
 interface ItemFormFieldProps {
   control: Control<any>;
@@ -7,6 +7,7 @@ interface ItemFormFieldProps {
   label: string;
   placeholder?: string;
   multiline?: boolean;
+  customOnChange?: (text: string) => void;
 }
 
 export function ItemFormField({
@@ -15,6 +16,7 @@ export function ItemFormField({
   label,
   placeholder,
   multiline,
+  customOnChange,
 }: ItemFormFieldProps) {
   return (
     <Controller
@@ -22,7 +24,7 @@ export function ItemFormField({
       name={name}
       render={({ field: { value, onChange }, fieldState: { error } }) => (
         <View style={styles.container}>
-          <Text style={styles.label}>{label}</Text>
+          {label && <Text style={styles.label}>{label}</Text>}
           <TextInput
             style={[
               styles.input,
@@ -30,7 +32,12 @@ export function ItemFormField({
               error && styles.inputError,
             ]}
             value={value}
-            onChangeText={onChange}
+            onChangeText={(text) => {
+              onChange(text);
+              if (customOnChange) {
+                customOnChange(text);
+              }
+            }}
             placeholder={placeholder}
             multiline={multiline}
           />

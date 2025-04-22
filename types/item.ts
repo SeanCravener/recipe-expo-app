@@ -1,35 +1,33 @@
-export interface Item {
-  id: string;
-  user_id: string;
-  title: string;
-  description: string;
-  main_image: string;
-  created_at: string;
-  updated_at: string;
-  average_rating: number;
-  categories: string[];
-  tags: string[];
-  ingredients: string[];
-  instructions: Instruction[];
-}
+import { Database } from "./supabase";
+
+type DbItem = Database["public"]["Tables"]["items"]["Row"];
+type DbCategory = Database["public"]["Tables"]["item_categories"]["Row"];
 
 export interface Instruction {
-  step_number: number;
-  instruction: string;
-  image_url?: string;
+  "image-url": string;
+  content: string;
+}
+
+export interface Item extends Omit<DbItem, "instructions"> {
+  instructions: Instruction[];
+  category?: DbCategory;
 }
 
 export interface ItemSummary {
   id: string;
   title: string;
   main_image: string;
-  average_rating: number;
-  categories: string[];
+  average_rating: number | null;
+  category_id: number | null;
+  category?: DbCategory;
 }
 
-export interface Rating {
-  item_id: string;
-  user_id: string;
-  rating: number;
-  created_at: string;
-}
+export type ItemFormData = {
+  title: string;
+  description: string;
+  main_image: string;
+  category_id: number | null;
+  tags: string[];
+  ingredients: string[];
+  instructions: Instruction[];
+};

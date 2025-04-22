@@ -34,13 +34,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      item_categories: {
+        Row: {
+          category: string
+          id: number
+        }
+        Insert: {
+          category: string
+          id?: number
+        }
+        Update: {
+          category?: string
+          id?: number
+        }
+        Relationships: []
+      }
+      item_ratings: {
+        Row: {
+          created_at: string
+          item_id: string
+          rating: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          item_id: string
+          rating: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          item_id?: string
+          rating?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "item_ratings_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      items: {
+        Row: {
+          average_rating: number | null
+          category_id: number | null
+          created_at: string
+          description: string
+          id: string
+          ingredients: string[] | null
+          instructions: Json[] | null
+          main_image: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_rating?: number | null
+          category_id?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          ingredients?: string[] | null
+          instructions?: Json[] | null
+          main_image: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_rating?: number | null
+          category_id?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          ingredients?: string[] | null
+          instructions?: Json[] | null
+          main_image?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "item_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      validate_instructions_format: {
+        Args: { instructions: Json[] }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

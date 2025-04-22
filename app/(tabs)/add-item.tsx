@@ -8,78 +8,80 @@ import {
 } from "react-native";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AddItemSchema, addItemSchema } from "../../lib/schemas";
+import { itemFormSchema } from "../../lib/schemas";
+import { ItemFormData, Instruction } from "../../types/item";
 import { ItemFormField } from "../../components/ItemFormField";
 import { ImageUploadField } from "../../components/ImageUploadField";
-import { DynamicList } from "../../components/DynamicList";
-import { InstructionList } from "../../components/InstructionList";
-import { useMutation } from "@tanstack/react-query";
+import { CategorySelect } from "../../components/CategorySelect";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "../../lib/supabase";
 import { router } from "expo-router";
+import { useAuth } from "../../contexts/auth/AuthContext";
 
 export default function AddItem() {
-  const { control, handleSubmit, watch } = useForm<AddItemSchema>({
-    resolver: zodResolver(addItemSchema),
+  const { session } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { control, handleSubmit, setValue, watch } = useForm<ItemFormData>({
+    resolver: zodResolver(itemFormSchema),
     defaultValues: {
-      ingredients: [""],
-      instructions: [{ instruction: "" }],
-      categories: [""],
-      tags: [""],
+      title: "",
+      description: "",
+      main_image: "",
+      category_id: null,
+      tags: [],
+      ingredients: [],
+      instructions: [{ content: "", "image-url": "" }],
     },
   });
 
-  const {
-    fields: categoryFields,
-    append: appendCategory,
-    remove: removeCategory,
-  } = useFieldArray({
-    control,
-    name: "categories",
-  });
-
-  const {
-    fields: tagFields,
-    append: appendTag,
-    remove: removeTag,
-  } = useFieldArray({
-    control,
-    name: "tags",
-  });
-
-  const {
-    fields: ingredientFields,
-    append: appendIngredient,
-    remove: removeIngredient,
-  } = useFieldArray({
-    control,
+  const ingredientsArray = useFieldArray({
+    control: control as any,
     name: "ingredients",
   });
 
-  const {
-    fields: instructionFields,
-    append: appendInstruction,
-    remove: removeInstruction,
-  } = useFieldArray({
-    control,
+  const instructionsArray = useFieldArray({
+    control: control as any,
     name: "instructions",
   });
 
   const addItemMutation = useMutation({
-    mutationFn: async (data: AddItemSchema) => {
-      // ... existing mutation logic ...
+    mutationFn: async (data: ItemFormData) => {
+      if (!session?.user.id) throw new Error("Must be logged in to add items");
+
+      const { data: item, error } = await supabase
+        .from("items")
+        .insert({
+          title: data.title,
+          description: data.description,
+          main_image: data.main_image,
+          category_id: data.category_id,
+          tags: data.tags,
+          ingredients: data.ingredients,
+          instructions: data.instructions,
+          user_id: session.user.id,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return item;
     },
-    onSuccess: (item) => {
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["items"] });
       Alert.alert("Success", "Recipe added successfully!", [
         {
           text: "OK",
-          onPress: () => router.push(`/items/${item.id}`),
+          onPress: () => router.back(),
         },
       ]);
     },
-  });
-
-  const onSubmit = handleSubmit((data) => {
-    addItemMutation.mutate(data);
+    onError: (error) => {
+      Alert.alert(
+        "Error",
+        error instanceof Error ? error.message : "An error occurred"
+      );
+    },
   });
 
   return (
@@ -91,6 +93,7 @@ export default function AddItem() {
           label="Title"
           placeholder="Enter recipe title"
         />
+
         <ItemFormField
           control={control}
           name="description"
@@ -98,54 +101,108 @@ export default function AddItem() {
           placeholder="Enter recipe description"
           multiline
         />
+
         <ImageUploadField
           label="Main Image"
           value={watch("main_image")}
-          onChange={(url) => control._setValue("main_image", url)}
+          onChange={(url) => setValue("main_image", url)}
         />
-        <DynamicList
-          control={control}
-          name="categories"
-          label="Categories"
-          fields={categoryFields}
-          append={appendCategory}
-          remove={removeCategory}
-          max={2}
-          placeholder="Enter category"
-        />
-        <DynamicList
-          control={control}
-          name="tags"
-          label="Tags"
-          fields={tagFields}
-          append={appendTag}
-          remove={removeTag}
-          max={10}
-          placeholder="Enter tag"
-        />
-        <DynamicList
-          control={control}
-          name="ingredients"
-          label="Ingredients"
-          fields={ingredientFields}
-          append={appendIngredient}
-          remove={removeIngredient}
-          max={20}
-          placeholder="Enter ingredient"
-        />
-        <InstructionList
-          control={control}
-          fields={instructionFields}
-          append={appendInstruction}
-          remove={removeInstruction}
-          max={20}
-        />
+
+        <CategorySelect control={control} />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Tags</Text>
+          <ItemFormField
+            control={control}
+            name="tags"
+            label=""
+            placeholder="Enter tags (comma separated)"
+            customOnChange={(text: string) => {
+              setValue(
+                "tags",
+                text
+                  .split(",")
+                  .map((tag) => tag.trim())
+                  .filter(Boolean)
+              );
+            }}
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Ingredients</Text>
+          {ingredientsArray.fields.map((field, index) => (
+            <View key={field.id} style={styles.fieldRow}>
+              <View style={styles.fieldContainer}>
+                <ItemFormField
+                  control={control}
+                  name={`ingredients.${index}`}
+                  label=""
+                  placeholder="Enter ingredient"
+                />
+              </View>
+              <Pressable
+                onPress={() => ingredientsArray.remove(index)}
+                style={styles.removeButton}
+              >
+                <Text style={styles.removeButtonText}>Remove</Text>
+              </Pressable>
+            </View>
+          ))}
+          <Pressable
+            onPress={() => ingredientsArray.append("")}
+            style={styles.addButton}
+          >
+            <Text style={styles.addButtonText}>Add Ingredient</Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Instructions</Text>
+          {instructionsArray.fields.map((field, index) => (
+            <View key={field.id} style={styles.instructionContainer}>
+              <Text style={styles.stepNumber}>Step {index + 1}</Text>
+              <ItemFormField
+                control={control}
+                name={`instructions.${index}.content`}
+                label=""
+                placeholder="Enter instruction"
+                multiline
+              />
+              <ImageUploadField
+                label="Step Image (Optional)"
+                value={watch(`instructions.${index}.image-url`)}
+                onChange={(url) =>
+                  setValue(`instructions.${index}.image-url`, url)
+                }
+              />
+              <Pressable
+                onPress={() => instructionsArray.remove(index)}
+                style={styles.removeButton}
+              >
+                <Text style={styles.removeButtonText}>Remove Step</Text>
+              </Pressable>
+            </View>
+          ))}
+          <Pressable
+            onPress={() =>
+              instructionsArray.append({
+                content: "",
+                "image-url": "",
+              } as Instruction)
+            }
+            style={styles.addButton}
+          >
+            <Text style={styles.addButtonText}>Add Step</Text>
+          </Pressable>
+        </View>
+
         <Pressable
           style={[
             styles.submitButton,
             addItemMutation.isPending && styles.buttonDisabled,
           ]}
-          onPress={onSubmit}
+          onPress={handleSubmit((data) => addItemMutation.mutate(data))}
           disabled={addItemMutation.isPending}
         >
           <Text style={styles.submitButtonText}>
@@ -165,20 +222,68 @@ const styles = StyleSheet.create({
   content: {
     padding: 16,
   },
-  submitButton: {
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
+  fieldRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  fieldContainer: {
+    flex: 1,
+    marginRight: 8,
+  },
+  instructionContainer: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+  },
+  stepNumber: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  removeButton: {
+    backgroundColor: "#FF3B30",
+    padding: 8,
+    borderRadius: 6,
+  },
+  removeButtonText: {
+    color: "white",
+    fontSize: 14,
+  },
+  addButton: {
     backgroundColor: "#007AFF",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  addButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  submitButton: {
+    backgroundColor: "#34C759",
     padding: 16,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 24,
     marginBottom: 40,
   },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
   submitButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });

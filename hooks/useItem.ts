@@ -15,10 +15,7 @@ export function useItem(id: string) {
         .select(
           `
           *,
-          categories:item_categories(category),
-          tags:item_tags(tag),
-          ingredients:item_ingredients(ingredient),
-          instructions:item_instructions(step_number, instruction, image_url)
+          category:item_categories(*)
         `
         )
         .eq("id", id)
@@ -28,14 +25,8 @@ export function useItem(id: string) {
 
       return {
         ...data,
-        categories: data.categories.map((c: any) => c.category),
-        tags: data.tags.map((t: any) => t.tag),
-        ingredients: data.ingredients
-          .sort((a: any, b: any) => a.position - b.position)
-          .map((i: any) => i.ingredient),
-        instructions: data.instructions.sort(
-          (a: any, b: any) => a.step_number - b.step_number
-        ),
+        instructions: data.instructions as Item["instructions"],
+        category: data.category?.[0],
       };
     },
   });

@@ -3,9 +3,10 @@ import { ItemFormField } from "./ItemFormField";
 import { ImageUploadField } from "./ImageUploadField";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Control } from "react-hook-form";
+import { ItemFormData } from "../types/item";
 
 interface InstructionListProps {
-  control: Control<any>;
+  control: Control<ItemFormData>;
   fields: Record<"id", string>[];
   append: () => void;
   remove: (index: number) => void;
@@ -40,24 +41,31 @@ export function InstructionList({
           </View>
           <ItemFormField
             control={control}
-            name={`instructions.${index}.instruction`}
+            name={`instructions.${index}.content`}
             label="Instruction"
             placeholder="Enter instruction"
             multiline
           />
           <ImageUploadField
             label="Step Image (Optional)"
-            value={control._formValues?.instructions?.[index]?.image_url || ""}
+            value={
+              control._formValues?.instructions?.[index]?.["image-url"] || ""
+            }
             onChange={(url) => {
-              const values = control._formValues?.instructions || [];
-              values[index] = { ...values[index], image_url: url };
-              control._formValues.instructions = values;
+              const instructions = [
+                ...(control._formValues?.instructions || []),
+              ];
+              if (!instructions[index]) {
+                instructions[index] = { content: "", "image-url": "" };
+              }
+              instructions[index]["image-url"] = url;
+              control._formValues.instructions = instructions;
             }}
           />
         </View>
       ))}
       {fields.length < max && (
-        <Pressable onPress={append} style={styles.addButton}>
+        <Pressable onPress={() => append()} style={styles.addButton}>
           <MaterialIcons name="add-circle" size={24} color="#007AFF" />
           <Text style={styles.addButtonText}>Add step</Text>
         </Pressable>

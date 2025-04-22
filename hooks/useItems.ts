@@ -4,65 +4,75 @@ import { ItemSummary } from "../types/item";
 
 const ITEMS_PER_PAGE = 10;
 
+interface PageResult {
+  items: ItemSummary[];
+  nextPage: number | undefined;
+}
+
 export function useItems(searchQuery?: string) {
-  const {
-    data,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
-  } = useInfiniteQuery({
+  const query = useInfiniteQuery<
+    PageResult,
+    Error,
+    { pages: PageResult[] },
+    [string, string?],
+    number
+  >({
     queryKey: ["items", searchQuery],
     queryFn: async ({ pageParam = 0 }) => {
       const from = pageParam * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
-      let query = supabase.from("items").select(`
+      let dbQuery = supabase.from("items").select(`
           id,
           title,
           main_image,
           average_rating,
-          categories:item_categories(category)
+          category_id,
+          category:item_categories!inner(
+            id,
+            category
+          )
         `);
 
       if (searchQuery) {
-        query = query
+        dbQuery = dbQuery
           .or(
             `
             title.ilike.%${searchQuery}%,
             description.ilike.%${searchQuery}%,
-            item_tags.tag.ilike.%${searchQuery}%
+            tags.cs.{${searchQuery}}
           `
           )
-          .order("title", { ascending: true });
+          .order("title");
       } else {
-        query = query.order("created_at", { ascending: false });
+        dbQuery = dbQuery.order("created_at", { ascending: false });
       }
 
-      const { data, error } = await query.range(from, to);
+      const { data, error } = await dbQuery.range(from, to);
 
       if (error) throw error;
 
       return {
         items: data.map((item) => ({
-          ...item,
-          categories: item.categories.map((c: any) => c.category),
+          id: item.id,
+          title: item.title,
+          main_image: item.main_image,
+          average_rating: item.average_rating,
+          category_id: item.category_id,
+          category: item.category?.[0],
         })),
         nextPage: data.length === ITEMS_PER_PAGE ? pageParam + 1 : undefined,
       };
     },
+    initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextPage,
   });
 
-  const items = data?.pages.flatMap((page) => page.items) ?? [];
-
   return {
-    items,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    refetch,
+    data: query.data?.pages.flatMap((page) => page.items) ?? [],
+    isLoading: query.isLoading,
+    isFetchingNextPage: query.isFetchingNextPage,
+    hasNextPage: query.hasNextPage,
+    fetchNextPage: query.fetchNextPage,
   };
 }

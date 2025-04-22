@@ -7,19 +7,20 @@ import {
   StyleSheet,
   Alert,
   useWindowDimensions,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useItem } from "../../../hooks/useItem";
-import { IngredientsDrawer } from "../../../components/IngredientsDrawer";
 import { RatingModal } from "../../../components/RatingModal";
+import { Instruction } from "../../../types/item";
 
 export default function Instructions() {
   const { id } = useLocalSearchParams();
-  const { data: item, submitRating } = useItem(id as string);
-  const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
+  const { data: item, isLoading, submitRating } = useItem(id as string);
   const [currentStep, setCurrentStep] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
   const { width } = useWindowDimensions();
 
   const handleExit = useCallback(() => {
@@ -44,7 +45,7 @@ export default function Instructions() {
   }, [currentStep]);
 
   const handleNext = useCallback(() => {
-    if (item && currentStep < item.instructions.length - 1) {
+    if (item?.instructions && currentStep < item.instructions.length - 1) {
       setCurrentStep((prev) => prev + 1);
     }
   }, [currentStep, item]);
@@ -58,11 +59,25 @@ export default function Instructions() {
     router.back();
   }, []);
 
-  if (!item) return null;
+  if (isLoading || !item) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
-  const currentInstruction = item.instructions[currentStep];
+  if (!item.instructions || item.instructions.length === 0) {
+    return (
+      <View style={styles.centered}>
+        <Text>No instructions available</Text>
+      </View>
+    );
+  }
+
+  const currentInstruction = item.instructions[currentStep] as Instruction;
   const isLastStep = currentStep === item.instructions.length - 1;
-  const imageToShow = currentInstruction.image_url || item.main_image;
+  const imageToShow = currentInstruction["image-url"] || item.main_image;
 
   const handleRating = async (rating: number) => {
     return new Promise<void>((resolve, reject) => {
@@ -96,9 +111,7 @@ export default function Instructions() {
         />
         <View style={styles.content}>
           <Text style={styles.stepHeader}>Step {currentStep + 1}</Text>
-          <Text style={styles.instruction}>
-            {currentInstruction.instruction}
-          </Text>
+          <Text style={styles.instruction}>{currentInstruction.content}</Text>
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
               <View
@@ -144,16 +157,30 @@ export default function Instructions() {
           )}
         </View>
       </View>
-      <IngredientsDrawer
-        ingredients={item.ingredients}
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-      />
+
+      {isDrawerOpen && (
+        <View style={styles.drawer}>
+          <View style={styles.drawerHeader}>
+            <Text style={styles.drawerTitle}>Ingredients</Text>
+            <Pressable onPress={() => setIsDrawerOpen(false)}>
+              <MaterialIcons name="close" size={24} color="#666" />
+            </Pressable>
+          </View>
+          <View style={styles.drawerContent}>
+            {item.ingredients?.map((ingredient, index) => (
+              <Text key={index} style={styles.ingredient}>
+                • {ingredient}
+              </Text>
+            ))}
+          </View>
+        </View>
+      )}
+
       <RatingModal
         isVisible={isRatingModalVisible}
         onClose={handleCloseRating}
         onSubmit={handleRating}
-        itemTitle={item?.title ?? ""}
+        itemTitle={item.title}
       />
     </>
   );
@@ -163,6 +190,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
     height: 300,
@@ -249,5 +281,41 @@ const styles = StyleSheet.create({
   headerButton: {
     padding: 8,
     marginRight: 8,
+  },
+  drawer: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 300,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: -2,
+      height: 0,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  drawerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  drawerTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+  },
+  drawerContent: {
+    padding: 16,
+  },
+  ingredient: {
+    fontSize: 16,
+    marginBottom: 12,
+    lineHeight: 24,
   },
 });

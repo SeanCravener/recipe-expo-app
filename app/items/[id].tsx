@@ -12,7 +12,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useItem } from "../../hooks/useItem";
 import { useAuth } from "../../contexts/auth/AuthContext";
 import { ItemHeader } from "../../components/ItemHeader";
-import { IngredientsList } from "../../components/IngredientsList";
 import { Share } from "react-native";
 
 export default function ItemDetail() {
@@ -76,14 +75,33 @@ export default function ItemDetail() {
         <View style={styles.details}>
           <ItemHeader
             title={item.title}
-            categories={item.categories}
+            category={item.category?.category}
             averageRating={item.average_rating}
           />
           <View style={styles.section}>
             <Text style={styles.description}>{item.description}</Text>
           </View>
+          {item.tags && item.tags.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Tags</Text>
+              <View style={styles.tags}>
+                {item.tags.map((tag, index) => (
+                  <View key={index} style={styles.tag}>
+                    <Text style={styles.tagText}>{tag}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
           <View style={styles.divider} />
-          <IngredientsList ingredients={item.ingredients} />
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Ingredients</Text>
+            {item.ingredients?.map((ingredient, index) => (
+              <Text key={index} style={styles.ingredient}>
+                • {ingredient}
+              </Text>
+            ))}
+          </View>
         </View>
       </ScrollView>
       <View style={styles.footer}>
@@ -121,14 +139,38 @@ const styles = StyleSheet.create({
   section: {
     padding: 16,
   },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12,
+  },
   description: {
     fontSize: 16,
     lineHeight: 24,
     color: "#333",
   },
+  tags: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  tag: {
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  tagText: {
+    color: "#666",
+  },
   divider: {
     height: 8,
     backgroundColor: "#f5f5f5",
+  },
+  ingredient: {
+    fontSize: 16,
+    marginBottom: 8,
+    lineHeight: 24,
   },
   footer: {
     flexDirection: "row",

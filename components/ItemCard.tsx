@@ -23,10 +23,14 @@ export function ItemCard({ item }: ItemCardProps) {
           {item.title}
         </Text>
         <View style={styles.details}>
-          <Text style={styles.category}>{item.categories[0]}</Text>
+          <Text style={styles.category}>
+            {item.category?.category || "Uncategorized"}
+          </Text>
           <Text style={styles.dot}> • </Text>
           <MaterialIcons name="star" size={16} color="#FFD700" />
-          <Text style={styles.rating}>{item.average_rating.toFixed(1)}</Text>
+          <Text style={styles.rating}>
+            {item.average_rating?.toFixed(1) || "N/A"}
+          </Text>
         </View>
       </View>
     </Pressable>

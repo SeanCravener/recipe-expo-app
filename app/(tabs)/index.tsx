@@ -7,14 +7,23 @@ import {
 } from "react-native";
 import { useItems } from "../../hooks/useItems";
 import { ItemCard } from "../../components/ItemCard";
-import { HomeSearchBar } from "../../components/HomeSearchBar";
 import { useCallback } from "react";
+import { HomeSearchBar } from "../../components/HomeSearchBar";
+import { ItemSummary } from "../../types/item";
 
 export default function Home() {
-  const { items, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useItems();
+  const {
+    data: items,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useItems();
 
-  const renderItem = useCallback(({ item }) => <ItemCard item={item} />, []);
+  const renderItem = useCallback(
+    ({ item }: { item: ItemSummary }) => <ItemCard item={item} />,
+    []
+  );
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -36,7 +45,7 @@ export default function Home() {
     if (!isFetchingNextPage) return null;
     return (
       <View style={styles.footer}>
-        <ActivityIndicator size="small" />
+        <ActivityIndicator size="small" color="#007AFF" />
       </View>
     );
   }, [isFetchingNextPage]);
@@ -44,7 +53,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
@@ -61,6 +70,11 @@ export default function Home() {
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={renderFooter}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No items found</Text>
+          </View>
+        }
       />
     </View>
   );
@@ -91,5 +105,13 @@ const styles = StyleSheet.create({
   footer: {
     paddingVertical: 16,
     alignItems: "center",
+  },
+  emptyContainer: {
+    padding: 16,
+    alignItems: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
   },
 });
