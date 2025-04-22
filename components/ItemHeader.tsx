@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Rating } from "./Rating";
 
 interface ItemHeaderProps {
   title: string;
@@ -17,7 +16,7 @@ export function ItemHeader({
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.ratingContainer}>
-        <Rating value={averageRating} />
+        <MaterialIcons name="star" size={20} color="#FFD700" />
         <Text style={styles.rating}>{averageRating.toFixed(1)}</Text>
       </View>
       <View style={styles.categories}>

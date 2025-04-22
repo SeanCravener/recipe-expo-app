@@ -1,4 +1,12 @@
-import { View, ScrollView, Image, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Pressable,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useItem } from "../../hooks/useItem";
@@ -19,7 +27,6 @@ export default function ItemDetail() {
       await Share.share({
         title: item.title,
         message: `Check out this recipe: ${item.title}`,
-        // You might want to add a deep link URL here
       });
     } catch (error) {
       console.error("Error sharing:", error);
@@ -31,13 +38,17 @@ export default function ItemDetail() {
   };
 
   if (isLoading || !item) {
-    return null; // You might want to add a loading indicator here
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
   }
 
   const isOwner = session?.user.id === item.user_id;
 
   return (
-    <>
+    <View style={styles.container}>
       <Stack.Screen
         options={{
           headerTitle: "",
@@ -56,36 +67,34 @@ export default function ItemDetail() {
             : undefined,
         }}
       />
-      <View style={styles.container}>
-        <ScrollView style={styles.content}>
-          <Image
-            source={{ uri: item.main_image }}
-            style={styles.image}
-            resizeMode="cover"
+      <ScrollView style={styles.content}>
+        <Image
+          source={{ uri: item.main_image }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        <View style={styles.details}>
+          <ItemHeader
+            title={item.title}
+            categories={item.categories}
+            averageRating={item.average_rating}
           />
-          <View style={styles.details}>
-            <ItemHeader
-              title={item.title}
-              categories={item.categories}
-              averageRating={item.average_rating}
-            />
-            <View style={styles.section}>
-              <Text style={styles.description}>{item.description}</Text>
-            </View>
-            <View style={styles.divider} />
-            <IngredientsList ingredients={item.ingredients} />
+          <View style={styles.section}>
+            <Text style={styles.description}>{item.description}</Text>
           </View>
-        </ScrollView>
-        <View style={styles.footer}>
-          <Pressable style={styles.startButton} onPress={handleStartRecipe}>
-            <Text style={styles.startButtonText}>Start Recipe</Text>
-          </Pressable>
-          <Pressable style={styles.shareButton} onPress={handleShare}>
-            <MaterialIcons name="share" size={24} color="#007AFF" />
-          </Pressable>
+          <View style={styles.divider} />
+          <IngredientsList ingredients={item.ingredients} />
         </View>
+      </ScrollView>
+      <View style={styles.footer}>
+        <Pressable style={styles.startButton} onPress={handleStartRecipe}>
+          <Text style={styles.startButtonText}>Start Recipe</Text>
+        </Pressable>
+        <Pressable style={styles.shareButton} onPress={handleShare}>
+          <MaterialIcons name="share" size={24} color="#007AFF" />
+        </Pressable>
       </View>
-    </>
+    </View>
   );
 }
 
@@ -93,6 +102,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     flex: 1,

@@ -4,7 +4,6 @@ import { AddItemSchema } from "../lib/schemas";
 import { router } from "expo-router";
 import { Alert } from "react-native";
 import { cleanupItemImages } from "../lib/storage";
-import { Item } from "../types/item";
 
 export function useEditItem(itemId: string) {
   const queryClient = useQueryClient();
@@ -30,7 +29,7 @@ export function useEditItem(itemId: string) {
         currentItem.main_image,
         ...currentItem.instructions
           .map((instruction: any) => instruction.image_url)
-          .filter(Boolean),
+          .filter((url): url is string => typeof url === "string"),
       ];
 
       // Collect all new images
@@ -38,7 +37,7 @@ export function useEditItem(itemId: string) {
         data.main_image,
         ...data.instructions
           .map((instruction) => instruction.image_url)
-          .filter(Boolean),
+          .filter((url): url is string => typeof url === "string"),
       ];
 
       // Update main item data

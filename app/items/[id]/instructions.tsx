@@ -64,6 +64,15 @@ export default function Instructions() {
   const isLastStep = currentStep === item.instructions.length - 1;
   const imageToShow = currentInstruction.image_url || item.main_image;
 
+  const handleRating = async (rating: number) => {
+    return new Promise<void>((resolve, reject) => {
+      submitRating(rating, {
+        onSuccess: () => resolve(),
+        onError: (error) => reject(error),
+      });
+    });
+  };
+
   return (
     <>
       <Stack.Screen
@@ -143,7 +152,7 @@ export default function Instructions() {
       <RatingModal
         isVisible={isRatingModalVisible}
         onClose={handleCloseRating}
-        onSubmit={submitRating}
+        onSubmit={handleRating}
         itemTitle={item?.title ?? ""}
       />
     </>

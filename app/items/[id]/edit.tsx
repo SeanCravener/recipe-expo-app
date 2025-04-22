@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useForm, useFieldArray } from "react-hook-form";
@@ -25,33 +26,19 @@ export default function EditItem() {
     id as string
   );
 
-  const { control, handleSubmit, reset, watch } = useForm<AddItemSchema>({
-    resolver: zodResolver(addItemSchema),
-    defaultValues: {
-      ingredients: [""],
-      instructions: [{ instruction: "" }],
-      categories: [""],
-      tags: [""],
-    },
-  });
-
-  // Set form default values when item data is loaded
-  useEffect(() => {
-    if (item) {
-      reset({
-        title: item.title,
-        description: item.description,
-        main_image: item.main_image,
-        categories: item.categories,
-        tags: item.tags,
-        ingredients: item.ingredients,
-        instructions: item.instructions.map((instruction) => ({
-          instruction: instruction.instruction,
-          image_url: instruction.image_url,
-        })),
-      });
-    }
-  }, [item, reset]);
+  const { control, handleSubmit, reset, watch, setValue } =
+    useForm<AddItemSchema>({
+      resolver: zodResolver(addItemSchema),
+      defaultValues: {
+        title: "",
+        description: "",
+        main_image: "",
+        categories: [""],
+        tags: [""],
+        ingredients: [""],
+        instructions: [{ instruction: "", image_url: "" }],
+      },
+    });
 
   const {
     fields: categoryFields,
@@ -60,6 +47,7 @@ export default function EditItem() {
   } = useFieldArray({
     control,
     name: "categories",
+    keyName: "id",
   });
 
   const {
@@ -69,6 +57,7 @@ export default function EditItem() {
   } = useFieldArray({
     control,
     name: "tags",
+    keyName: "id",
   });
 
   const {
@@ -78,6 +67,7 @@ export default function EditItem() {
   } = useFieldArray({
     control,
     name: "ingredients",
+    keyName: "id",
   });
 
   const {
@@ -87,17 +77,35 @@ export default function EditItem() {
   } = useFieldArray({
     control,
     name: "instructions",
+    keyName: "id",
   });
+
+  useEffect(() => {
+    if (item) {
+      reset({
+        title: item.title,
+        description: item.description,
+        main_image: item.main_image,
+        categories: item.categories.length > 0 ? item.categories : [""],
+        tags: item.tags.length > 0 ? item.tags : [""],
+        ingredients: item.ingredients.length > 0 ? item.ingredients : [""],
+        instructions:
+          item.instructions.length > 0
+            ? item.instructions.map((instruction) => ({
+                instruction: instruction.instruction,
+                image_url: instruction.image_url || "",
+              }))
+            : [{ instruction: "", image_url: "" }],
+      });
+    }
+  }, [item, reset]);
 
   const handleDelete = () => {
     Alert.alert(
       "Delete Recipe",
       "Are you sure you want to delete this recipe? This action cannot be undone.",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
@@ -108,7 +116,11 @@ export default function EditItem() {
   };
 
   if (isLoading) {
-    return null; // Or show loading indicator
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
   }
 
   return (
@@ -130,14 +142,14 @@ export default function EditItem() {
         <ImageUploadField
           label="Main Image"
           value={watch("main_image")}
-          onChange={(url) => control._setValue("main_image", url)}
+          onChange={(url) => setValue("main_image", url)}
         />
         <DynamicList
           control={control}
           name="categories"
           label="Categories"
           fields={categoryFields}
-          append={appendCategory}
+          append={() => appendCategory("")}
           remove={removeCategory}
           max={2}
           placeholder="Enter category"
@@ -147,7 +159,7 @@ export default function EditItem() {
           name="tags"
           label="Tags"
           fields={tagFields}
-          append={appendTag}
+          append={() => appendTag("")}
           remove={removeTag}
           max={10}
           placeholder="Enter tag"
@@ -157,7 +169,7 @@ export default function EditItem() {
           name="ingredients"
           label="Ingredients"
           fields={ingredientFields}
-          append={appendIngredient}
+          append={() => appendIngredient("")}
           remove={removeIngredient}
           max={20}
           placeholder="Enter ingredient"
@@ -165,7 +177,7 @@ export default function EditItem() {
         <InstructionList
           control={control}
           fields={instructionFields}
-          append={appendInstruction}
+          append={() => appendInstruction({ instruction: "", image_url: "" })}
           remove={removeInstruction}
           max={20}
         />
@@ -181,7 +193,7 @@ export default function EditItem() {
           </Pressable>
           <Pressable
             style={[styles.saveButton, isEditing && styles.buttonDisabled]}
-            onPress={handleSubmit(editItem)}
+            onPress={handleSubmit((data) => editItem(data))}
             disabled={isDeleting || isEditing}
           >
             <Text style={styles.saveButtonText}>
@@ -193,11 +205,15 @@ export default function EditItem() {
     </ScrollView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     padding: 16,

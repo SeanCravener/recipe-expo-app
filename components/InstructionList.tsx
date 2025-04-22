@@ -47,18 +47,17 @@ export function InstructionList({
           />
           <ImageUploadField
             label="Step Image (Optional)"
-            value={control._getWatch(`instructions.${index}.image_url`)}
-            onChange={(url) =>
-              control._setValue(`instructions.${index}.image_url`, url)
-            }
+            value={control._formValues?.instructions?.[index]?.image_url || ""}
+            onChange={(url) => {
+              const values = control._formValues?.instructions || [];
+              values[index] = { ...values[index], image_url: url };
+              control._formValues.instructions = values;
+            }}
           />
         </View>
       ))}
       {fields.length < max && (
-        <Pressable
-          onPress={() => append({ instruction: "", image_url: "" })}
-          style={styles.addButton}
-        >
+        <Pressable onPress={append} style={styles.addButton}>
           <MaterialIcons name="add-circle" size={24} color="#007AFF" />
           <Text style={styles.addButtonText}>Add step</Text>
         </Pressable>
