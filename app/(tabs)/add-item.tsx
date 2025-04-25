@@ -13,27 +13,27 @@ import { ItemFormData, Instruction } from "../../types/item";
 import { ItemFormField } from "../../components/ItemFormField";
 import { ImageUploadField } from "../../components/ImageUploadField";
 import { CategorySelect } from "../../components/CategorySelect";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../../lib/supabase";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { useAuth } from "../../contexts/auth/AuthContext";
+import { useAddItem } from "../../hooks/useAddItem";
 
 export default function AddItem() {
   const { session } = useAuth();
-  const queryClient = useQueryClient();
+  const router = useRouter();
 
-  const { control, handleSubmit, setValue, watch } = useForm<ItemFormData>({
-    resolver: zodResolver(itemFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      main_image: "",
-      category_id: null,
-      tags: [],
-      ingredients: [],
-      instructions: [{ content: "", "image-url": "" }],
-    },
-  });
+  const { control, handleSubmit, setValue, watch, reset } =
+    useForm<ItemFormData>({
+      resolver: zodResolver(itemFormSchema),
+      defaultValues: {
+        title: "",
+        description: "",
+        main_image: "",
+        category_id: null,
+        tags: [],
+        ingredients: [],
+        instructions: [{ content: "", "image-url": "" }],
+      },
+    });
 
   const ingredientsArray = useFieldArray({
     control: control as any,
@@ -45,44 +45,24 @@ export default function AddItem() {
     name: "instructions",
   });
 
-  const addItemMutation = useMutation({
-    mutationFn: async (data: ItemFormData) => {
-      if (!session?.user.id) throw new Error("Must be logged in to add items");
+  const addItemMutation = useAddItem(session?.user.id);
 
-      const { data: item, error } = await supabase
-        .from("items")
-        .insert({
-          title: data.title,
-          description: data.description,
-          main_image: data.main_image,
-          category_id: data.category_id,
-          tags: data.tags,
-          ingredients: data.ingredients,
-          instructions: data.instructions,
-          user_id: session.user.id,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return item;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["items"] });
-      Alert.alert("Success", "Recipe added successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.back(),
-        },
-      ]);
-    },
-    onError: (error) => {
-      Alert.alert(
-        "Error",
-        error instanceof Error ? error.message : "An error occurred"
-      );
-    },
-  });
+  const onSubmit = (data: ItemFormData) => {
+    addItemMutation.mutate(data, {
+      onSuccess: (item) => {
+        // Reset the form after successful creation
+        reset();
+        // Navigate to the detail page (replace so AddItem isn't in backstack)
+        router.navigate(`/items/${item.id}`);
+      },
+      onError: (error) => {
+        Alert.alert(
+          "Error",
+          error instanceof Error ? error.message : "An error occurred"
+        );
+      },
+    });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -93,7 +73,6 @@ export default function AddItem() {
           label="Title"
           placeholder="Enter recipe title"
         />
-
         <ItemFormField
           control={control}
           name="description"
@@ -101,15 +80,12 @@ export default function AddItem() {
           placeholder="Enter recipe description"
           multiline
         />
-
         <ImageUploadField
           label="Main Image"
           value={watch("main_image")}
           onChange={(url) => setValue("main_image", url)}
         />
-
         <CategorySelect control={control} />
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Tags</Text>
           <ItemFormField
@@ -128,7 +104,6 @@ export default function AddItem() {
             }}
           />
         </View>
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ingredients</Text>
           {ingredientsArray.fields.map((field, index) => (
@@ -156,7 +131,6 @@ export default function AddItem() {
             <Text style={styles.addButtonText}>Add Ingredient</Text>
           </Pressable>
         </View>
-
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Instructions</Text>
           {instructionsArray.fields.map((field, index) => (
@@ -196,13 +170,12 @@ export default function AddItem() {
             <Text style={styles.addButtonText}>Add Step</Text>
           </Pressable>
         </View>
-
         <Pressable
           style={[
             styles.submitButton,
             addItemMutation.isPending && styles.buttonDisabled,
           ]}
-          onPress={handleSubmit((data) => addItemMutation.mutate(data))}
+          onPress={handleSubmit(onSubmit)}
           disabled={addItemMutation.isPending}
         >
           <Text style={styles.submitButtonText}>
