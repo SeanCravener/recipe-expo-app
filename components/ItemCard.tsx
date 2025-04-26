@@ -24,7 +24,7 @@ export function ItemCard({ item }: ItemCardProps) {
         </Text>
         <View style={styles.details}>
           <Text style={styles.category}>
-            {item.category?.category || "Uncategorized"}
+            {item.category || "Uncategorized"}
           </Text>
           <Text style={styles.dot}> • </Text>
           <MaterialIcons name="star" size={16} color="#FFD700" />

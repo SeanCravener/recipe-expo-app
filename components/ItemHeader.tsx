@@ -3,7 +3,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 interface ItemHeaderProps {
   title: string;
-  category?: string;
+  category: string;
   averageRating: number | null;
 }
 
@@ -19,7 +19,7 @@ export function ItemHeader({
         <MaterialIcons name="star" size={20} color="#FFD700" />
         <Text style={styles.rating}>{averageRating?.toFixed(1) || "N/A"}</Text>
       </View>
-      <Text style={styles.category}>{category || "Uncategorized"}</Text>
+      <Text style={styles.category}>{category}</Text>
     </View>
   );
 }

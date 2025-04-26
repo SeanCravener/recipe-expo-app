@@ -15,18 +15,19 @@ export function useItem(id: string) {
         .select(
           `
           *,
-          category:item_categories(*)
-        `
+          category:item_categories!inner(
+            category
+          )        `
         )
         .eq("id", id)
         .single();
 
       if (error) throw error;
-
+      console.log("item data category", data.category.category);
       return {
         ...data,
         instructions: data.instructions as Item["instructions"],
-        category: data.category?.[0],
+        category: data.category.category,
       };
     },
   });

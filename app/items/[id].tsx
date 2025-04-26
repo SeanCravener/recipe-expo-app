@@ -75,7 +75,7 @@ export default function ItemDetail() {
         <View style={styles.details}>
           <ItemHeader
             title={item.title}
-            category={item.category?.category}
+            category={item.category}
             averageRating={item.average_rating}
           />
           <View style={styles.section}>

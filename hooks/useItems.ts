@@ -29,7 +29,6 @@ export function useItems(searchQuery?: string) {
           average_rating,
           category_id,
           category:item_categories!inner(
-            id,
             category
           )
         `);
@@ -59,7 +58,7 @@ export function useItems(searchQuery?: string) {
           main_image: item.main_image,
           average_rating: item.average_rating,
           category_id: item.category_id,
-          category: item.category?.[0],
+          category: item.category.category, // Need to figure out type error, but this works for now.
         })),
         nextPage: data.length === ITEMS_PER_PAGE ? pageParam + 1 : undefined,
       };

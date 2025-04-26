@@ -10,7 +10,7 @@ export interface Instruction {
 
 export interface Item extends Omit<DbItem, "instructions"> {
   instructions: Instruction[];
-  category?: DbCategory;
+  category: string;
 }
 
 export interface ItemSummary {
@@ -19,7 +19,7 @@ export interface ItemSummary {
   main_image: string;
   average_rating: number | null;
   category_id: number | null;
-  category?: DbCategory;
+  category: string;
 }
 
 export type ItemFormData = {
