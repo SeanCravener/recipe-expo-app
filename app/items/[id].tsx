@@ -81,18 +81,6 @@ export default function ItemDetail() {
           <View style={styles.section}>
             <Text style={styles.description}>{item.description}</Text>
           </View>
-          {item.tags && item.tags.length > 0 && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Tags</Text>
-              <View style={styles.tags}>
-                {item.tags.map((tag, index) => (
-                  <View key={index} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
           <View style={styles.divider} />
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Ingredients</Text>

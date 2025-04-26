@@ -29,7 +29,6 @@ export const itemFormSchema = z.object({
   description: z.string().min(1, "Description is required"),
   main_image: z.string().min(1, "Main image is required"),
   category_id: z.number().nullable(),
-  tags: z.array(z.string()),
   ingredients: z
     .array(z.string().min(1, "Ingredient cannot be empty"))
     .min(2, "At least two ingredients are required")

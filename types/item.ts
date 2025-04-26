@@ -1,7 +1,6 @@
 import { Database } from "./supabase";
 
 type DbItem = Database["public"]["Tables"]["items"]["Row"];
-type DbCategory = Database["public"]["Tables"]["item_categories"]["Row"];
 
 export interface Instruction {
   "image-url": string;
@@ -27,7 +26,6 @@ export type ItemFormData = {
   description: string;
   main_image: string;
   category_id: number | null;
-  tags: string[];
   ingredients: string[];
   instructions: Instruction[];
 };

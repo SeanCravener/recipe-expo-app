@@ -39,7 +39,6 @@ export function useItems(searchQuery?: string) {
             `
             title.ilike.%${searchQuery}%,
             description.ilike.%${searchQuery}%,
-            tags.cs.{${searchQuery}}
           `
           )
           .order("title");

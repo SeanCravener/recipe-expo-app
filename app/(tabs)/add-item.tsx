@@ -29,7 +29,6 @@ export default function AddItem() {
         description: "",
         main_image: "",
         category_id: null,
-        tags: [],
         ingredients: [],
         instructions: [{ content: "", "image-url": "" }],
       },
@@ -86,24 +85,6 @@ export default function AddItem() {
           onChange={(url) => setValue("main_image", url)}
         />
         <CategorySelect control={control} />
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tags</Text>
-          <ItemFormField
-            control={control}
-            name="tags"
-            label=""
-            placeholder="Enter tags (comma separated)"
-            customOnChange={(text: string) => {
-              setValue(
-                "tags",
-                text
-                  .split(",")
-                  .map((tag) => tag.trim())
-                  .filter(Boolean)
-              );
-            }}
-          />
-        </View>
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ingredients</Text>
           {ingredientsArray.fields.map((field, index) => (

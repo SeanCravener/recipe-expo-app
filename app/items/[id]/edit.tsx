@@ -34,7 +34,6 @@ export default function EditItem() {
         description: "",
         main_image: "",
         category_id: null,
-        tags: [],
         ingredients: [],
         instructions: [{ content: "", "image-url": "" }],
       },
@@ -57,7 +56,6 @@ export default function EditItem() {
         description: item.description,
         main_image: item.main_image,
         category_id: item.category_id,
-        tags: item.tags ?? [],
         ingredients: item.ingredients ?? [],
         instructions: item.instructions ?? [{ content: "", "image-url": "" }],
       });
@@ -112,25 +110,6 @@ export default function EditItem() {
         />
 
         <CategorySelect control={control} />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tags</Text>
-          <ItemFormField
-            control={control}
-            name="tags"
-            label=""
-            placeholder="Enter tags (comma separated)"
-            customOnChange={(text: string) => {
-              setValue(
-                "tags",
-                text
-                  .split(",")
-                  .map((tag) => tag.trim())
-                  .filter(Boolean)
-              );
-            }}
-          />
-        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Ingredients</Text>
