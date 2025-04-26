@@ -47,7 +47,6 @@ export function useEditItem(itemId: string) {
           description: data.description,
           main_image: data.main_image,
           category_id: data.category_id,
-          tags: data.tags,
           ingredients: data.ingredients,
           instructions: data.instructions,
           updated_at: new Date().toISOString(),
