@@ -88,7 +88,6 @@ export type Database = {
           ingredients: string[] | null
           instructions: Json[] | null
           main_image: string
-          tags: string[] | null
           title: string
           updated_at: string
           user_id: string
@@ -102,7 +101,6 @@ export type Database = {
           ingredients?: string[] | null
           instructions?: Json[] | null
           main_image: string
-          tags?: string[] | null
           title: string
           updated_at?: string
           user_id: string
@@ -116,7 +114,6 @@ export type Database = {
           ingredients?: string[] | null
           instructions?: Json[] | null
           main_image?: string
-          tags?: string[] | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -154,6 +151,29 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      user_favorites: {
+        Row: {
+          item_id: string
+          user_id: string
+        }
+        Insert: {
+          item_id: string
+          user_id: string
+        }
+        Update: {
+          item_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_favorites_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
