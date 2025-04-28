@@ -14,10 +14,12 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useItem } from "../../../hooks/useItem";
 import { RatingModal } from "../../../components/RatingModal";
 import { Instruction } from "../../../types/item";
+import { useAuth } from "../../../contexts/auth/AuthContext";
 
 export default function Instructions() {
   const { id } = useLocalSearchParams();
   const { data: item, isLoading, submitRating } = useItem(id as string);
+  const { session } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
@@ -51,6 +53,7 @@ export default function Instructions() {
   }, [currentStep, item]);
 
   const handleFinish = useCallback(() => {
+    if (!session) router.back();
     setIsRatingModalVisible(true);
   }, []);
 
