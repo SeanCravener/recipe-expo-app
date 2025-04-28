@@ -105,33 +105,6 @@ function ProfileContent() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 20,
-    padding: 20,
-  },
-  text: {
-    fontSize: 24,
-    textAlign: "center",
-  },
-  button: {
-    backgroundColor: "#FF3B30",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 200,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 10,
+    backgroundColor: "#f5f5f5",
   },
 });
