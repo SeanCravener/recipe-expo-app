@@ -1,3 +1,4 @@
+import "../global.css";
 import { Stack } from "expo-router";
 import { AuthProvider } from "../contexts/auth/AuthContext";
 import { QueryProvider } from "../contexts/query/QueryProvider";
