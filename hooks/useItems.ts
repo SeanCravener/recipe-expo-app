@@ -28,7 +28,7 @@ export function useItems(
     PageResult,
     Error,
     { pages: PageResult[] },
-    [string, ItemFetchMode, string?],
+    [string, ItemFetchMode, string | undefined],
     number
   >({
     queryKey: ["items", mode, searchQuery],
@@ -42,7 +42,6 @@ export function useItems(
       if (mode === "favorited") {
         const userId = await getUserId();
         if (userId) {
-          // Separate query for user_favorites to avoid type conflict
           const { data, error: favError } = await supabase
             .from("user_favorites")
             .select(
@@ -61,7 +60,7 @@ export function useItems(
               `
             )
             .eq("user_id", userId)
-            .order("created_at", { ascending: false }) // Order by user_favorites.created_at directly
+            .order("created_at", { ascending: false })
             .range(from, to);
 
           if (favError) {
@@ -71,6 +70,29 @@ export function useItems(
           }
         } else {
           return { items: [], nextPage: undefined };
+        }
+      } else if (mode === "search" && searchQuery) {
+        // Format search query for tsquery (e.g., "word1 & word2")
+        const formattedQuery = searchQuery
+          .split(" ")
+          .filter(Boolean)
+          .join(" & ");
+
+        // Call RPC with explicit parameter names
+        const { data, error: searchError } = await supabase.rpc(
+          "search_items",
+          {
+            search_term: formattedQuery || "*", // Default to wildcard if empty
+            page_number: pageParam,
+            page_size: ITEMS_PER_PAGE,
+          }
+        );
+
+        if (searchError) {
+          console.error("RPC Search Error:", searchError);
+          error = searchError;
+        } else {
+          itemsData = data || [];
         }
       } else {
         // Base Supabase query for other modes (items table directly)
@@ -85,16 +107,7 @@ export function useItems(
           )
         `);
 
-        if (mode === "search" && searchQuery) {
-          dbQuery = dbQuery
-            .or(
-              `
-              title.ilike.%${searchQuery}%,
-              description.ilike.%${searchQuery}%,
-              `
-            )
-            .order("title", { ascending: true });
-        } else if (mode === "created") {
+        if (mode === "created") {
           const userId = await getUserId();
           if (userId) {
             dbQuery = dbQuery
