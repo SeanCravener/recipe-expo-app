@@ -11,8 +11,8 @@ import { useLocalSearchParams, router, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useItem } from "../../hooks/useItem";
 import { useAuth } from "../../contexts/auth/AuthContext";
-import { ItemHeader } from "../../components/ItemHeader";
 import { Share } from "react-native";
+import FavoriteButton from "../../components/FavoriteButton";
 
 export default function ItemDetail() {
   const { id } = useLocalSearchParams();
@@ -73,11 +73,24 @@ export default function ItemDetail() {
           resizeMode="cover"
         />
         <View style={styles.details}>
-          <ItemHeader
+          {/* <ItemHeader
             title={item.title}
             category={item.category}
             averageRating={item.average_rating}
-          />
+          /> */}
+          <View style={styles.headerContainer}>
+            <View style={styles.headerTop}>
+              <Text style={styles.title}>{item.title}</Text>
+              <FavoriteButton itemId={item.id} size={20} />
+            </View>
+            <View style={styles.ratingContainer}>
+              <MaterialIcons name="star" size={20} color="#FFD700" />
+              <Text style={styles.rating}>
+                {item.average_rating?.toFixed(1) || "N/A"}
+              </Text>
+            </View>
+            <Text style={styles.category}>{item.category}</Text>
+          </View>
           <View style={styles.section}>
             <Text style={styles.description}>{item.description}</Text>
           </View>
@@ -194,5 +207,45 @@ const styles = StyleSheet.create({
   },
   headerButtonPressed: {
     opacity: 0.7,
+  },
+  headerContainer: {
+    padding: 16,
+  },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  rating: {
+    marginLeft: 4,
+    fontSize: 16,
+    color: "#666",
+  },
+  categories: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  category: {
+    fontSize: 16,
+    color: "#666",
+  },
+  dot: {
+    marginHorizontal: 4,
+    color: "#666",
   },
 });
