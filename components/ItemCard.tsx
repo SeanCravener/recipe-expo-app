@@ -2,6 +2,7 @@ import { View, Text, Image, Pressable, StyleSheet } from "react-native";
 import { router } from "expo-router";
 import { ItemSummary } from "../types/item";
 import { MaterialIcons } from "@expo/vector-icons";
+import FavoriteButton from "../components/FavoriteButton";
 
 interface ItemCardProps {
   item: ItemSummary;
@@ -33,6 +34,9 @@ export function ItemCard({ item }: ItemCardProps) {
           </Text>
         </View>
       </View>
+      <View style={styles.favoriteContainer}>
+        <FavoriteButton itemId={item.id} size={20} />
+      </View>
     </Pressable>
   );
 }
@@ -53,6 +57,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    position: "relative", // Needed for absolute positioning of favorite button
   },
   image: {
     width: 80,
@@ -84,5 +89,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 4,
     color: "#666",
+  },
+  favoriteContainer: {
+    position: "absolute",
+    top: 12,
+    right: 12,
   },
 });

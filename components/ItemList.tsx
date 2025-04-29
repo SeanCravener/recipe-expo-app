@@ -7,7 +7,7 @@ import {
   Text,
   FlatListProps,
 } from "react-native";
-import { ItemCard } from "../components/ItemCard";
+import { ItemCard } from "../components/ItemCard"; // Adjust path as needed
 import { ItemSummary } from "../types/item";
 
 interface ItemListProps {

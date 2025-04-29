@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from "react-native";
-import { useItems } from "../../hooks/useItems";
-import { HomeSearchBar } from "../../components/HomeSearchBar";
+import { useItems } from "../../hooks/useItems"; // Adjust path as needed
+import { HomeSearchBar } from "../../components/HomeSearchBar"; // Adjust path as needed
 import ItemList from "../../components/ItemList"; // Adjust path as needed
 
 export default function Home() {
