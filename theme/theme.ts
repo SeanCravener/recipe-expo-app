@@ -70,8 +70,7 @@ const commonColors = {
   onError: "#FFFFFF",
   errorContainer: "#F9DEDC",
   onErrorContainer: "#410E0B",
-  shadow: "#000000",
-  scrim: "#000000",
+  transparent: "rgba(0,0,0,0)",
 };
 
 // Light and Dark Theme Colors

@@ -4,13 +4,14 @@ import { useTheme } from "../../../hooks/useTheme";
 import { Icon, Text, View } from "../../ui";
 
 type DisplayType = "full" | "compact";
+type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
 
 interface RatingDisplayProps {
   value: number;
   displayType?: DisplayType;
   maxStars?: number;
   size?: number;
-  color?: keyof ReturnType<typeof useTheme>["theme"]["colors"];
+  color?: ColorKey;
 }
 
 export const RatingDisplay: React.FC<RatingDisplayProps> = ({

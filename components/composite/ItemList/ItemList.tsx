@@ -1,14 +1,9 @@
 import React, { useCallback } from "react";
-import {
-  View,
-  FlatList,
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  FlatListProps,
-} from "react-native";
-import { ItemCard } from "../components/ItemCard"; // Adjust path as needed
-import { ItemSummary } from "../types/item";
+import { FlatList, FlatListProps } from "react-native";
+import { ItemSummary } from "@/types/item";
+import { ItemCard } from "../ItemCard/ItemCard";
+import { View, Text, Loading } from "../../ui";
+import { router } from "expo-router";
 
 interface ItemListProps {
   data: ItemSummary[] | undefined; // Items to display
@@ -20,7 +15,7 @@ interface ItemListProps {
   emptyText?: string; // Custom text for empty state
 }
 
-const ItemList = ({
+export const ItemList = ({
   data,
   isLoading,
   isFetchingNextPage,
@@ -30,7 +25,9 @@ const ItemList = ({
   emptyText = "No items found",
 }: ItemListProps) => {
   const renderItem = useCallback(
-    ({ item }: { item: ItemSummary }) => <ItemCard item={item} />,
+    ({ item }: { item: ItemSummary }) => (
+      <ItemCard item={item} onPress={() => handleItemPress(item.id)} />
+    ),
     []
   );
 
@@ -42,19 +39,15 @@ const ItemList = ({
 
   const renderFooter = useCallback(() => {
     if (!isFetchingNextPage) return null;
-    return (
-      <View style={styles.footer}>
-        <ActivityIndicator size="small" color="#007AFF" />
-      </View>
-    );
+    return <Loading size="small" />;
   }, [isFetchingNextPage]);
 
+  const handleItemPress = (itemId: string) => {
+    router.push(`/items/${itemId}`);
+  };
+
   if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
+    return <Loading size="small" />;
   }
 
   return (
@@ -63,44 +56,20 @@ const ItemList = ({
       renderItem={renderItem}
       ListHeaderComponent={ListHeaderComponent}
       keyExtractor={(item) => item.id}
-      contentContainerStyle={styles.list}
       showsVerticalScrollIndicator={false}
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
       ListEmptyComponent={
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>{emptyText}</Text>
+        <View
+          padding="md"
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text variant="md" align="center">
+            {emptyText}
+          </Text>
         </View>
       }
     />
   );
 };
-
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  list: {
-    paddingVertical: 12,
-  },
-  footer: {
-    paddingVertical: 16,
-    alignItems: "center",
-  },
-  emptyContainer: {
-    flex: 1,
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-  },
-});
-
-export default ItemList;

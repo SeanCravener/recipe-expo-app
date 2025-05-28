@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
-import { ThemeContext } from "../contexts/ThemeContext";
+import { ThemeContext } from "@/contexts/ThemeContext";
 import { theme, ThemeMode } from "../theme/theme";
 
 interface ThemeProviderProps {

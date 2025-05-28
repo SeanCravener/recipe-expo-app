@@ -1,7 +1,7 @@
 import { View, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
-import ProfileHeader from "../../components/ProfileHeader"; // Adjust path as needed
-import ItemList from "../../components/ItemList"; // Adjust path as needed
+import { ProfileHeader } from "@/components/composite/Headers/ProfileHeader"; // Adjust path as needed
+import { ItemList } from "../../components/composite"; // Adjust path as needed
 import { useItems } from "../../hooks/useItems";
 import { supabase } from "../../lib/supabase";
 import { ProtectedRoute } from "../../components/protected/ProtectedRoute";

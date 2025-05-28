@@ -1,9 +1,8 @@
 import { View, StyleSheet } from "react-native";
 import { useItems } from "../../hooks/useItems";
-import { SearchBar } from "../../components/SearchBar";
+import { SearchBar, ItemList } from "../../components/composite";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import ItemList from "../../components/ItemList"; // Adjust path as needed
 
 export default function Search() {
   const [searchQuery, setSearchQuery] = useState("");

@@ -1,65 +1,49 @@
 // components/composites/FavoriteButton.tsx
-import React, { useState } from "react";
-import { Animated, Pressable, StyleProp, ViewStyle } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Icon } from "../../ui/index";
-
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
+import React from "react";
+import { Pressable } from "react-native";
+import { Image } from "../../ui/index";
+import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface FavoriteButtonProps {
-  isFavorite?: boolean;
-  onToggle?: (favorited: boolean) => void;
-  iconFilled?: React.ReactNode;
-  iconOutline?: React.ReactNode;
-  color?: ColorKey;
+  itemId: string; // unique identifier for the item
+  isFavorited?: boolean;
   size?: number;
-  style?: StyleProp<ViewStyle>;
 }
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
-  isFavorite: isFavoriteProp,
-  onToggle,
-  iconFilled,
-  iconOutline,
-  color = "primary",
+  itemId,
+  isFavorited: isFavoriteProp,
   size = 24,
-  style,
 }) => {
-  const { theme } = useTheme();
-  const [isFavorite, setIsFavorite] = useState(isFavoriteProp ?? false);
-  const [scale] = useState(new Animated.Value(1));
+  const { favoritedItemIds, isLoading, toggleFavorite } = useFavorites();
 
-  const handleToggle = () => {
-    const newValue = !isFavorite;
-    setIsFavorite(newValue);
-    onToggle?.(newValue);
+  const isFavorited =
+    isFavoriteProp !== undefined
+      ? isFavoriteProp
+      : favoritedItemIds.includes(itemId);
 
-    // simple scale animation for feedback
-    Animated.sequence([
-      Animated.timing(scale, {
-        toValue: 0.85,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+  const handlePress = () => {
+    if (!isLoading) {
+      toggleFavorite(itemId, !isFavorited);
+    }
   };
 
-  const filled = iconFilled ?? <Icon name="heart" color={color} size={size} />;
-
-  const outline = iconOutline ?? (
-    <Icon name="heart" color="onSurfaceVariant" size={size} />
-  );
-
   return (
-    <Pressable onPress={handleToggle} style={style}>
-      <Animated.View style={{ transform: [{ scale }] }}>
-        {isFavorite ? filled : outline}
-      </Animated.View>
+    <Pressable
+      onPress={handlePress}
+      style={{ padding: 5, justifyContent: "center", alignItems: "center" }}
+      disabled={isLoading}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
+      <Image
+        source={
+          isFavorited
+            ? require("../../../assets/heart-filled.png") // Replace with your filled heart image
+            : require("../../../assets/heart-unfilled.png") // Replace with your unfilled heart image
+        }
+        style={[{ width: size, height: size }]}
+        resizeMode="contain"
+      />
     </Pressable>
   );
 };

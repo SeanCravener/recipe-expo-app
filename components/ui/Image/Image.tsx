@@ -24,7 +24,7 @@ export const Image: React.FC<CustomImageProps> = ({
   radius = "none",
   elevation = "level0",
   opacity = "full",
-  backgroundColor = "surfaceContainerLowest",
+  backgroundColor = "transparent",
   style,
   ...rest
 }) => {

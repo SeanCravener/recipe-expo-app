@@ -1,3 +1,5 @@
+// Need to finish optimizing and tweaking component for reuse. Commented out old code for reference.
+
 import React from "react";
 import {
   StyleProp,
@@ -9,12 +11,12 @@ import {
 import { useTheme } from "../../../hooks/useTheme";
 import { Text, View } from "../index";
 
-type Variant = "filled" | "outlined" | "unstyled";
+// type Variant = "filled" | "outlined" | "unstyled";
 type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
 
 interface InputProps extends TextInputProps {
   label?: string;
-  variant?: Variant;
+  // variant?: Variant;
   color?: ColorKey;
   style?: StyleProp<TextStyle>;
   containerStyle?: StyleProp<ViewStyle>;
@@ -22,7 +24,7 @@ interface InputProps extends TextInputProps {
 
 export const Input: React.FC<InputProps> = ({
   label,
-  variant = "filled",
+  // variant = "filled",
   color = "primary",
   style,
   containerStyle,
@@ -31,31 +33,30 @@ export const Input: React.FC<InputProps> = ({
   const { theme } = useTheme();
 
   const baseStyle: TextStyle = {
-    color: theme.colors.onSurface,
+    color: theme.colors.onPrimary,
     fontSize: theme.typography.fontSize.md,
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
     fontFamily: theme.typography.fontFamily.regular,
-    width: "100%", // ✅ Make input stretch full width
   };
 
-  const variantStyle: ViewStyle =
-    variant === "outlined"
-      ? {
-          borderWidth: 1,
-          borderColor: theme.colors.outline,
-          backgroundColor: theme.colors.surface,
-        }
-      : variant === "filled"
-      ? {
-          backgroundColor: theme.colors.surfaceVariant,
-        }
-      : {};
+  // const variantStyle: ViewStyle =
+  //   variant === "outlined"
+  //     ? {
+  //         borderWidth: 1,
+  //         borderColor: theme.colors.outline,
+  //         backgroundColor: theme.colors.surface,
+  //       }
+  //     : variant === "filled"
+  //     ? {
+  //         backgroundColor: theme.colors.primary,
+  //       }
+  //     : {};
 
-  const containerBaseStyle: ViewStyle = {
-    borderRadius: theme.borderRadius.sm,
-    width: "100%", // ✅ Make container stretch full width
-  };
+  // const containerBaseStyle: ViewStyle = {
+  //   borderRadius: theme.borderRadius.sm,
+  //   backgroundColor: theme.colors.primary,
+  // };
 
   return (
     <View style={containerStyle}>
@@ -68,10 +69,10 @@ export const Input: React.FC<InputProps> = ({
           {label}
         </Text>
       )}
-      <View style={[containerBaseStyle, variantStyle]}>
+      <View style={{ backgroundColor: theme.colors.primary }}>
         <TextInput
           style={[baseStyle, style]}
-          placeholderTextColor={theme.colors.onSurfaceVariant}
+          placeholderTextColor={theme.colors.onPrimary}
           {...rest}
         />
       </View>

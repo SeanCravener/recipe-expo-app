@@ -13,3 +13,5 @@ export * from "./Modal/Modal";
 export * from "./Text/Text";
 export * from "./Toggle/Toggle";
 export * from "./View/View";
+export * from "./View/Scroll";
+export * from "./Toggle/ToggleText";
