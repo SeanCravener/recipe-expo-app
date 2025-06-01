@@ -57,7 +57,7 @@ export default function SettingsScreen() {
       ) : (
         <Button
           title="Sign In"
-          onPress={() => router.push("/(auth)/sign-in")}
+          onPress={() => router.push("/(auth)/auth")}
           color="primary"
         />
       )}
