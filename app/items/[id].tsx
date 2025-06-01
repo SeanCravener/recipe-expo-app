@@ -8,8 +8,8 @@ import {
 } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useItem } from "../../hooks/useItem";
-import { useAuth } from "../../contexts/auth/AuthContext";
+import { useItem } from "@/hooks/useItem";
+import { useAuth } from "@/contexts/auth/AuthContext";
 import { Share } from "react-native";
 import { Image } from "@/components/ui";
 import { ItemDetails } from "@/components/composite";
@@ -44,6 +44,11 @@ export default function ItemDetail() {
     );
   }
 
+  // Custom back button handler. Temporary solution for testing.
+  const handleExit = () => {
+    router.back();
+  };
+
   const isOwner = session?.user.id === item.user_id;
 
   return (
@@ -64,6 +69,18 @@ export default function ItemDetail() {
                 </Pressable>
               )
             : undefined,
+          // Custom back button, temporary solution for testing.
+          headerLeft: () => (
+            <Pressable
+              onPress={handleExit}
+              style={({ pressed }) => [
+                styles.headerButton,
+                pressed && styles.headerButtonPressed,
+              ]}
+            >
+              <MaterialIcons name="arrow-back" size={24} color="#007AFF" />
+            </Pressable>
+          ),
         }}
       />
       <ScrollView style={styles.content}>
