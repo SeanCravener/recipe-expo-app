@@ -1,8 +1,8 @@
 import "../global.css";
 import { Stack } from "expo-router";
-import { AuthProvider } from "../contexts/auth/AuthContext";
-import { QueryProvider } from "../contexts/query/QueryProvider";
-import { ThemeProvider } from "@/theme/ThemeProvider";
+import { AuthProvider } from "@/contexts/auth/AuthContext";
+import { QueryProvider } from "@/contexts/query/QueryProvider";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 
 export default function RootLayout() {
@@ -14,16 +14,9 @@ export default function RootLayout() {
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen
-                name="(auth)/sign-in"
+                name="(auth)/auth"
                 options={{
-                  title: "Sign In",
-                  presentation: "modal",
-                }}
-              />
-              <Stack.Screen
-                name="(auth)/sign-up"
-                options={{
-                  title: "Sign Up",
+                  title: "Authentication",
                   presentation: "modal",
                 }}
               />
