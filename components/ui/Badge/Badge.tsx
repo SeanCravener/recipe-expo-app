@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Text, View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Text, View } from "@/components/ui";
 
 type Variant = "primary" | "success" | "warning" | "danger";
 type Size = "sm" | "md";

@@ -1,9 +1,7 @@
-// Need to finish optimizing and tweaking component for reuse. Commented out old code for reference.
-
 import React, { useState } from "react";
 import { Pressable, Keyboard, StyleProp, ViewStyle } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Icon, Input, View } from "../../ui/index";
+import { useTheme } from "@/hooks/useTheme";
+import { Input, View } from "@/components/ui";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface SearchBarProps {
@@ -55,12 +53,6 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           style,
         ]}
       >
-        {/* <Icon
-        name="search"
-        size={20}
-        color="onSurfaceVariant"
-        style={{ marginRight: theme.spacing.sm }}
-      /> */}
         <MaterialIcons
           name="search"
           size={24}

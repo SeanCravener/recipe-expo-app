@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleProp, Switch, ViewStyle } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Text, View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Text, View } from "@/components/ui";
 
 type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
 

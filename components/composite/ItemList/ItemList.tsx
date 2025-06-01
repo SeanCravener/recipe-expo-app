@@ -1,8 +1,8 @@
 import React, { useCallback } from "react";
 import { FlatList, FlatListProps } from "react-native";
 import { ItemSummary } from "@/types/item";
-import { ItemCard } from "../ItemCard/ItemCard";
-import { View, Text, Loading } from "../../ui";
+import { ItemCard } from "@/components/composite";
+import { View, Text, Loading } from "@/components/ui";
 import { router } from "expo-router";
 
 interface ItemListProps {

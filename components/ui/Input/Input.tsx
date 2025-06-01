@@ -1,65 +1,39 @@
-// Need to finish optimizing and tweaking component for reuse. Commented out old code for reference.
-
 import React from "react";
 import {
-  StyleProp,
   TextInput,
   TextInputProps,
-  TextStyle,
+  StyleSheet,
   ViewStyle,
+  TextStyle,
+  Pressable,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Text, View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Text, Icon, View } from "@/components/ui";
 
-// type Variant = "filled" | "outlined" | "unstyled";
 type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
 
 interface InputProps extends TextInputProps {
   label?: string;
-  // variant?: Variant;
   color?: ColorKey;
-  style?: StyleProp<TextStyle>;
-  containerStyle?: StyleProp<ViewStyle>;
+  containerStyle?: ViewStyle;
+  style?: TextStyle;
+  rightIcon?: string;
+  onRightIconPress?: () => void;
 }
 
 export const Input: React.FC<InputProps> = ({
   label,
-  // variant = "filled",
   color = "primary",
-  style,
   containerStyle,
+  style,
+  rightIcon,
+  onRightIconPress,
   ...rest
 }) => {
   const { theme } = useTheme();
 
-  const baseStyle: TextStyle = {
-    color: theme.colors.onPrimary,
-    fontSize: theme.typography.fontSize.md,
-    paddingVertical: theme.spacing.sm,
-    paddingHorizontal: theme.spacing.md,
-    fontFamily: theme.typography.fontFamily.regular,
-  };
-
-  // const variantStyle: ViewStyle =
-  //   variant === "outlined"
-  //     ? {
-  //         borderWidth: 1,
-  //         borderColor: theme.colors.outline,
-  //         backgroundColor: theme.colors.surface,
-  //       }
-  //     : variant === "filled"
-  //     ? {
-  //         backgroundColor: theme.colors.primary,
-  //       }
-  //     : {};
-
-  // const containerBaseStyle: ViewStyle = {
-  //   borderRadius: theme.borderRadius.sm,
-  //   backgroundColor: theme.colors.primary,
-  // };
-
   return (
-    <View style={containerStyle}>
+    <View style={[styles.container, containerStyle]}>
       {label && (
         <Text
           variant="label"
@@ -69,13 +43,48 @@ export const Input: React.FC<InputProps> = ({
           {label}
         </Text>
       )}
-      <View style={{ backgroundColor: theme.colors.primary }}>
+      <View
+        backgroundColor={color}
+        borderRadius="md"
+        style={styles.inputWrapper}
+      >
         <TextInput
-          style={[baseStyle, style]}
+          style={[
+            styles.input,
+            {
+              color: theme.colors.onPrimary,
+              fontSize: theme.typography.fontSize.md,
+              fontFamily: theme.typography.fontFamily.regular,
+            },
+            style,
+          ]}
           placeholderTextColor={theme.colors.onPrimary}
           {...rest}
         />
+        {rightIcon && onRightIconPress && (
+          <Pressable onPress={onRightIconPress} style={styles.iconContainer}>
+            <Icon name={rightIcon} size={20} color="onPrimary" />
+          </Pressable>
+        )}
       </View>
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 12,
+  },
+  iconContainer: {
+    paddingLeft: 8,
+  },
+});

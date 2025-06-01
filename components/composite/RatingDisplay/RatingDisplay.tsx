@@ -1,7 +1,6 @@
-// components/composites/RatingDisplay.tsx
 import React from "react";
-import { useTheme } from "../../../hooks/useTheme";
-import { Icon, Text, View } from "../../ui";
+import { useTheme } from "@/hooks/useTheme";
+import { Icon, Text, View } from "@/components/ui";
 
 type DisplayType = "full" | "compact";
 type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];

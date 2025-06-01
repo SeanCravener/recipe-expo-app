@@ -1,9 +1,8 @@
-// components/composites/ItemCard.tsx
 import React from "react";
 import { Pressable } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Image, Text, View } from "../../ui";
-import { FavoriteButton, RatingDisplay } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Image, Text, View } from "@/components/ui";
+import { FavoriteButton, RatingDisplay } from "@/components/composite";
 import { ItemSummary } from "@/types/item";
 
 interface ItemCardProps {

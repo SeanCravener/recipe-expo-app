@@ -1,8 +1,7 @@
-// components/base/Checkbox.tsx
 import React from "react";
 import { Pressable, StyleProp, TextStyle, ViewStyle } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Icon, Text, View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Icon, Text, View } from "@/components/ui";
 
 type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
 

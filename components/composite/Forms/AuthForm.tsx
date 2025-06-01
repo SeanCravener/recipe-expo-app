@@ -1,6 +1,5 @@
-import React from "react";
-import { Pressable } from "react-native";
-import { useForm, Controller } from "react-hook-form";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   SignInSchema,
@@ -9,7 +8,7 @@ import {
   signUpSchema,
 } from "@/lib/schemas";
 import { useTheme } from "@/hooks/useTheme";
-import { View, Text, Input } from "@/components/ui";
+import { Input, View, Text, Button, Icon } from "@/components/ui";
 
 interface AuthFormProps {
   mode: "signIn" | "signUp";
@@ -23,6 +22,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   isLoading,
 }) => {
   const { theme } = useTheme();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const {
     control,
@@ -36,16 +37,20 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         : { email: "", password: "", confirmPassword: "" },
   });
 
-  const onSubmitHandler = async (data: any) => {
+  const togglePassword = () => setShowPassword((prev) => !prev);
+  const toggleConfirm = () => setShowConfirm((prev) => !prev);
+
+  const handleSubmitForm = async (data: any) => {
     await onSubmit(data);
   };
 
   return (
-    <View padding="lg" style={{ gap: theme.spacing.md }}>
+    <View padding="lg" style={{ gap: theme.spacing.lg }}>
+      {/* Email Field */}
       <Controller
         control={control}
         name="email"
-        render={({ field: { onChange, value } }) => (
+        render={({ field: { value, onChange } }) => (
           <View style={{ gap: theme.spacing.xs }}>
             <Input
               placeholder="Email"
@@ -63,16 +68,28 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         )}
       />
 
+      {/* Password Field */}
       <Controller
         control={control}
         name="password"
-        render={({ field: { onChange, value } }) => (
+        render={({ field: { value, onChange } }) => (
           <View style={{ gap: theme.spacing.xs }}>
             <Input
               placeholder="Password"
-              secureTextEntry
+              secureTextEntry={!showPassword}
               value={value}
               onChangeText={onChange}
+              containerStyle={{ position: "relative" }}
+            />
+            <Icon
+              name={showPassword ? "eye-off" : "eye"}
+              onPress={togglePassword}
+              size={20}
+              style={{
+                position: "absolute",
+                right: theme.spacing.md,
+                top: theme.spacing.sm,
+              }}
             />
             {errors.password && (
               <Text variant="label" color="error">
@@ -83,17 +100,29 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         )}
       />
 
+      {/* Confirm Password Field (Sign Up Only) */}
       {mode === "signUp" && (
         <Controller
           control={control}
           name="confirmPassword"
-          render={({ field: { onChange, value } }) => (
+          render={({ field: { value, onChange } }) => (
             <View style={{ gap: theme.spacing.xs }}>
               <Input
                 placeholder="Confirm Password"
-                secureTextEntry
+                secureTextEntry={!showConfirm}
                 value={value}
                 onChangeText={onChange}
+                containerStyle={{ position: "relative" }}
+              />
+              <Icon
+                name={showConfirm ? "eye-off" : "eye"}
+                onPress={toggleConfirm}
+                size={20}
+                style={{
+                  position: "absolute",
+                  right: theme.spacing.md,
+                  top: theme.spacing.sm,
+                }}
               />
               {errors.confirmPassword && (
                 <Text variant="label" color="error">
@@ -105,22 +134,16 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         />
       )}
 
-      <Pressable
-        onPress={handleSubmit(onSubmitHandler)}
+      {/* Submit Button */}
+      <Button
+        title={
+          isLoading ? "Loading..." : mode === "signIn" ? "Sign In" : "Sign Up"
+        }
+        onPress={handleSubmit(handleSubmitForm)}
         disabled={isLoading}
-        style={{
-          backgroundColor: theme.colors.primary,
-          padding: theme.spacing.md,
-          borderRadius: theme.borderRadius.md,
-          alignItems: "center",
-          marginTop: theme.spacing.sm,
-          opacity: isLoading ? 0.5 : 1,
-        }}
-      >
-        <Text variant="label" color="onPrimary" fontWeight="bold">
-          {isLoading ? "Loading..." : mode === "signIn" ? "Sign In" : "Sign Up"}
-        </Text>
-      </Pressable>
+        size="lg"
+        elevation="level1"
+      />
     </View>
   );
 };

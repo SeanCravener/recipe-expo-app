@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Text, View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Text, View } from "@/components/ui";
 
 interface ErrorProps {
   title?: string;
@@ -22,7 +22,7 @@ export const Error: React.FC<ErrorProps> = ({
     <View
       backgroundColor="errorContainer"
       padding="md"
-      borderRadius="md" // ✅ Changed here
+      borderRadius="md"
       style={style}
     >
       {title && (

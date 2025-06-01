@@ -5,7 +5,7 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 type SpacingKey = keyof ReturnType<typeof useTheme>["theme"]["spacing"];
 type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];

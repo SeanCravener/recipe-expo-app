@@ -1,8 +1,7 @@
-// components/composites/RatingModal.tsx
 import React, { useEffect, useState } from "react";
 import { Pressable } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Button, Icon, Modal, Text, View } from "../../ui";
+import { useTheme } from "@/hooks/useTheme";
+import { Button, Icon, Modal, Text, View } from "@/components/ui";
 
 interface RatingModalProps {
   visible: boolean;

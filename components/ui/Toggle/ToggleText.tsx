@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable } from "react-native";
-import { Text, Scroll } from "../index";
+import { Text, Scroll } from "@/components/ui";
 import { useTheme } from "@/hooks/useTheme";
 
 interface ToggleTextProps {

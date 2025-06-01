@@ -5,7 +5,7 @@ import {
   StyleProp,
   TextStyle,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 type Variant = keyof ReturnType<
   typeof useTheme

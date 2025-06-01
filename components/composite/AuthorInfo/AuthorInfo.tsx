@@ -1,6 +1,5 @@
-// components/composites/AuthorInfo.tsx
 import React from "react";
-import { Avatar, Text, View } from "../../ui";
+import { Avatar, Text, View } from "@/components/ui";
 
 interface AuthorInfoProps {
   username: string;

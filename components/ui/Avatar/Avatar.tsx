@@ -5,8 +5,8 @@ import {
   TextStyle,
   ViewStyle,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Image, Text, View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Image, Text, View } from "@/components/ui";
 
 type Size = "sm" | "md" | "lg" | "xl";
 type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];

@@ -5,7 +5,7 @@ import {
   ImageProps as RNImageProps,
   StyleProp,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
+import { useTheme } from "@/hooks/useTheme";
 
 type RadiusKey = keyof ReturnType<typeof useTheme>["theme"]["borderRadius"];
 type ElevationKey = keyof ReturnType<typeof useTheme>["theme"]["elevation"];
@@ -17,7 +17,7 @@ interface CustomImageProps extends RNImageProps {
   elevation?: ElevationKey;
   opacity?: OpacityKey;
   backgroundColor?: ColorKey;
-  style?: StyleProp<ImageStyle>; // ✅ Fixed type here
+  style?: StyleProp<ImageStyle>;
 }
 
 export const Image: React.FC<CustomImageProps> = ({

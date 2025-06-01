@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { View } from "@/components/ui";
 
 type ElevationKey = keyof ReturnType<typeof useTheme>["theme"]["elevation"];
 type RadiusKey = keyof ReturnType<typeof useTheme>["theme"]["borderRadius"];

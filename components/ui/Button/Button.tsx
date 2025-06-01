@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   ViewStyle,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Text } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { Text } from "@/components/ui";
 
 type Variant = "filled" | "outlined" | "text";
 type ColorKey = "primary" | "secondary" | "tertiary";

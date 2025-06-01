@@ -1,7 +1,6 @@
-// components/composites/FavoriteButton.tsx
 import React from "react";
 import { Pressable } from "react-native";
-import { Image } from "../../ui/index";
+import { Image } from "@/components/ui";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface FavoriteButtonProps {
@@ -38,8 +37,8 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       <Image
         source={
           isFavorited
-            ? require("../../../assets/heart-filled.png") // Replace with your filled heart image
-            : require("../../../assets/heart-unfilled.png") // Replace with your unfilled heart image
+            ? require("../../../assets/heart-filled.png")
+            : require("../../../assets/heart-unfilled.png")
         }
         style={[{ width: size, height: size }]}
         resizeMode="contain"

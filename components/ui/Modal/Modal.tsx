@@ -1,4 +1,3 @@
-// components/base/Modal.tsx
 import React from "react";
 import {
   Pressable,
@@ -7,8 +6,8 @@ import {
   StyleSheet,
   ViewStyle,
 } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { View } from "../index";
+import { useTheme } from "@/hooks/useTheme";
+import { View } from "@/components/ui";
 
 interface ModalProps {
   visible: boolean;
@@ -39,7 +38,7 @@ export const Modal: React.FC<ModalProps> = ({
       <Pressable
         style={[
           styles.backdrop,
-          { backgroundColor: theme.colors[backdropColor] + "88" }, // 50% opacity
+          { backgroundColor: theme.colors[backdropColor] + "88" }, // Fix type error for backdrop color with transparency
         ]}
         onPress={onClose}
       >

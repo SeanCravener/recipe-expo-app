@@ -1,8 +1,7 @@
-// components/base/StepProgressBar.tsx
 import React from "react";
-import { View as RNView, StyleSheet } from "react-native";
-import { useTheme } from "../../../hooks/useTheme";
-import { Text, View } from "../../ui";
+import { View as RNView, StyleSheet } from "react-native"; // Need to double check use of View instead of custom View.
+import { useTheme } from "@/hooks/useTheme";
+import { Text, View } from "@/components/ui";
 
 interface StepProgressBarProps {
   currentStep: number;

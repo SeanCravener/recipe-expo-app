@@ -1,6 +1,6 @@
 import React from "react";
-import { View, ToggleText, Avatar } from "../../ui";
-import { useTheme } from "../../../hooks/useTheme";
+import { View, ToggleText, Avatar } from "@/components/ui";
+import { useTheme } from "@/hooks/useTheme";
 
 interface ProfileHeaderProps {
   avatarUri?: string;
