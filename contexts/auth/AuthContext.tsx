@@ -5,15 +5,18 @@ import {
   useState,
   PropsWithChildren,
 } from "react";
-import { Session } from "@supabase/supabase-js";
-import { supabase } from "../../lib/supabase";
-import { router } from "expo-router";
+import { Session, AuthChangeEvent } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 
 interface AuthContextType {
   session: Session | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (
+    email: string,
+    password: string,
+    confirmPassword?: string
+  ) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -24,60 +27,59 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Load session once on mount
+    const initSession = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession();
+
+      if (error) console.error("Session fetch error:", error);
       setSession(session);
       setIsLoading(false);
-    });
+    };
 
-    // Listen for auth changes
+    initSession();
+
+    // Listen to auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session) => {
       setSession(session);
     });
 
-    return () => {
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (error) {
-      throw error;
-    }
-
+    if (error) throw new Error(error.message);
     setSession(data.session);
   };
 
-  const signUp = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      throw error;
+  const signUp = async (
+    email: string,
+    password: string,
+    confirmPassword?: string
+  ) => {
+    if (confirmPassword && password !== confirmPassword) {
+      throw new Error("Passwords do not match");
     }
 
-    if (data.session) {
-      setSession(data.session);
-    } else {
-      // Handle email confirmation requirement if needed
-      router.replace("/");
-    }
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) throw new Error(error.message);
+    if (data.session) setSession(data.session);
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw error;
-    }
+
+    if (error) throw new Error(error.message);
     setSession(null);
   };
 
@@ -96,9 +98,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
   );
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
