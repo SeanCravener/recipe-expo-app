@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import { ItemFormData } from "../types/item";
+import { supabase } from "@/lib/supabase";
+import { ItemFormData } from "@/types/item";
 import { router } from "expo-router";
 import { Alert } from "react-native";
-import { cleanupItemImages } from "../lib/storage";
+import { cleanupItemImages } from "@/lib/storage";
 
 export function useEditItem(itemId: string) {
   const queryClient = useQueryClient();

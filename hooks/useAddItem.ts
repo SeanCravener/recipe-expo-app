@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import { ItemFormData } from "../types/item";
-import { cleanupItemImages } from "../lib/storage";
+import { supabase } from "@/lib/supabase";
+import { ItemFormData } from "@/types/item";
+import { cleanupItemImages } from "@/lib/storage";
 
 export function useAddItem(sessionUserId: string | undefined) {
   const queryClient = useQueryClient();

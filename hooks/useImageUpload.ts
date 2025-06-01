@@ -1,8 +1,8 @@
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { supabase } from "../lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { Platform } from "react-native";
-import { deleteStorageFile } from "../lib/storage";
+import { deleteStorageFile } from "@/lib/storage";
 
 export function useImageUpload() {
   const [isUploading, setIsUploading] = useState(false);

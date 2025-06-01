@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import { Item } from "../types/item";
-import { useAuth } from "../contexts/auth/AuthContext";
+import { supabase } from "@/lib/supabase";
+import { Item } from "@/types/item";
+import { useAuth } from "@/contexts/auth/AuthContext";
 
 export function useItem(id: string) {
   const queryClient = useQueryClient();

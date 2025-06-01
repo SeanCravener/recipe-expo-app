@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { supabase } from "../lib/supabase";
-import { ItemSummary } from "../types/item";
+import { supabase } from "@/lib/supabase";
+import { ItemSummary } from "@/types/item";
 
 const ITEMS_PER_PAGE = 10;
 
