@@ -1,10 +1,12 @@
-import { View, Text, Pressable, StyleSheet } from "react-native";
-import { useAuth } from "../contexts/auth/AuthContext";
-import { useState } from "react";
+import React, { useState } from "react";
 import { router } from "expo-router";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import { useThemeContext } from "@/contexts/ThemeContext";
+import { View, Text, Button, ToggleText } from "@/components/ui";
 
-export default function Profile() {
+export default function SettingsScreen() {
   const { session, signOut } = useAuth();
+  const { mode, setMode } = useThemeContext();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,65 +25,42 @@ export default function Profile() {
     }
   };
 
+  const handleModeChange = (value: string) => {
+    setMode(value === "Dark" ? "dark" : "light");
+  };
+
   return (
-    <View style={styles.container}>
-      {error && <Text style={styles.errorText}>{error}</Text>}
-      <Text style={styles.text}>
-        Welcome, {session ? session?.user.id : " please log in"}
-      </Text>
-      {session && (
-        <Pressable
-          style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleSignOut}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading ? "Logging out..." : "Log Out"}
-          </Text>
-        </Pressable>
+    <View padding="lg" style={{ justifyContent: "center", gap: 24, flex: 1 }}>
+      {error && (
+        <Text color="error" align="center">
+          {error}
+        </Text>
       )}
-      {!session && (
-        <Pressable
+
+      <Text variant="title" align="center">
+        Welcome, {session ? session.user.id : "Guest"}
+      </Text>
+
+      <ToggleText
+        options={["Light", "Dark"]}
+        selected={mode === "dark" ? "Dark" : "Light"}
+        onChange={handleModeChange}
+      />
+
+      {session ? (
+        <Button
+          title={isLoading ? "Logging out..." : "Log Out"}
+          onPress={handleSignOut}
+          color="secondary"
+          disabled={isLoading}
+        />
+      ) : (
+        <Button
+          title="Sign In"
           onPress={() => router.push("/(auth)/sign-in")}
-          style={styles.button}
-        >
-          <Text style={styles.buttonText}>Sign in</Text>
-        </Pressable>
+          color="primary"
+        />
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 20,
-    padding: 20,
-  },
-  text: {
-    fontSize: 24,
-    textAlign: "center",
-  },
-  button: {
-    backgroundColor: "#FF3B30",
-    padding: 15,
-    borderRadius: 5,
-    alignItems: "center",
-    width: "100%",
-    maxWidth: 200,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: "white",
-    fontWeight: "bold",
-  },
-  errorText: {
-    color: "red",
-    textAlign: "center",
-    marginBottom: 10,
-  },
-});

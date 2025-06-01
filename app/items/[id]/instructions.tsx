@@ -1,20 +1,15 @@
-import { useState, useCallback } from "react";
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-  Alert,
-  useWindowDimensions,
-  ActivityIndicator,
-} from "react-native";
+import React, { useState, useCallback } from "react";
+import { Image, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useItem } from "../../../hooks/useItem";
-import { RatingModal } from "../../../components/RatingModal";
-import { Instruction } from "../../../types/item";
-import { useAuth } from "../../../contexts/auth/AuthContext";
+import { useItem } from "@/hooks/useItem";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import { Instruction } from "@/types/item";
+import {
+  RatingModal,
+  StepProgressBar,
+  IngredientsDrawer,
+} from "@/components/composite";
+import { Button, Loading, Text, View } from "@/components/ui";
 
 export default function Instructions() {
   const { id } = useLocalSearchParams();
@@ -26,24 +21,11 @@ export default function Instructions() {
   const { width } = useWindowDimensions();
 
   const handleExit = useCallback(() => {
-    Alert.alert(
-      "Exit Recipe",
-      "Are you sure you want to exit? Your progress will be lost.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Exit",
-          style: "destructive",
-          onPress: () => router.back(),
-        },
-      ]
-    );
+    router.back();
   }, []);
 
   const handlePrevious = useCallback(() => {
-    if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
-    }
+    if (currentStep > 0) setCurrentStep((prev) => prev - 1);
   }, [currentStep]);
 
   const handleNext = useCallback(() => {
@@ -53,34 +35,14 @@ export default function Instructions() {
   }, [currentStep, item]);
 
   const handleFinish = useCallback(() => {
-    if (!session) router.back();
+    if (!session) return router.back();
     setIsRatingModalVisible(true);
-  }, []);
+  }, [session]);
 
   const handleCloseRating = useCallback(() => {
     setIsRatingModalVisible(false);
     router.back();
   }, []);
-
-  if (isLoading || !item) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
-
-  if (!item.instructions || item.instructions.length === 0) {
-    return (
-      <View style={styles.centered}>
-        <Text>No instructions available</Text>
-      </View>
-    );
-  }
-
-  const currentInstruction = item.instructions[currentStep] as Instruction;
-  const isLastStep = currentStep === item.instructions.length - 1;
-  const imageToShow = currentInstruction["image-url"] || item.main_image;
 
   const handleRating = async (rating: number) => {
     return new Promise<void>((resolve, reject) => {
@@ -91,234 +53,111 @@ export default function Instructions() {
     });
   };
 
+  if (isLoading || !item) {
+    return <Loading fullScreen />;
+  }
+
+  if (!item.instructions || item.instructions.length === 0) {
+    return (
+      <View padding="lg" style={{ alignItems: "center" }}>
+        <Text>No instructions available.</Text>
+      </View>
+    );
+  }
+
+  const currentInstruction = item.instructions[currentStep] as Instruction;
+  const isLastStep = currentStep === item.instructions.length - 1;
+  const imageToShow = currentInstruction["image-url"] || item.main_image;
+
   return (
     <>
       <Stack.Screen
         options={{
           headerTitle: item.title,
           headerRight: () => (
-            <Pressable
+            <Button
+              title="List"
+              variant="text"
+              size="sm"
               onPress={() => setIsDrawerOpen(true)}
-              style={styles.headerButton}
-            >
-              <MaterialIcons name="list" size={24} color="#007AFF" />
-            </Pressable>
+            />
           ),
         }}
       />
-      <View style={styles.container}>
+
+      <View style={{ flex: 1 }}>
         <Image
           source={{ uri: imageToShow }}
-          style={[styles.image, { width }]}
+          style={{ width, height: 300 }}
           resizeMode="cover"
         />
-        <View style={styles.content}>
-          <Text style={styles.stepHeader}>Step {currentStep + 1}</Text>
-          <Text style={styles.instruction}>{currentInstruction.content}</Text>
-          <View style={styles.progressContainer}>
-            <View style={styles.progressBar}>
-              <View
-                style={[
-                  styles.progress,
-                  {
-                    width: `${
-                      ((currentStep + 1) / item.instructions.length) * 100
-                    }%`,
-                  },
-                ]}
-              />
-            </View>
-            <Text style={styles.progressText}>
-              Step {currentStep + 1} of {item.instructions.length}
-            </Text>
-          </View>
+
+        <View padding="lg" style={{ flex: 1 }}>
+          <Text variant="title" fontWeight="bold" style={{ marginBottom: 12 }}>
+            Step {currentStep + 1}
+          </Text>
+
+          <Text variant="body" style={{ marginBottom: 16 }}>
+            {currentInstruction.content}
+          </Text>
+
+          <StepProgressBar
+            currentStep={currentStep + 1}
+            totalSteps={item.instructions.length}
+          />
         </View>
-        <View style={styles.footer}>
+
+        <View
+          padding="md"
+          style={{ borderTopWidth: 1, borderTopColor: "#eee" }}
+        >
           {isLastStep ? (
-            <Pressable style={styles.finishButton} onPress={handleFinish}>
-              <Text style={styles.finishButtonText}>Finish Recipe</Text>
-            </Pressable>
+            <Button
+              title="Finish Recipe"
+              color="tertiary"
+              size="lg"
+              onPress={handleFinish}
+            />
           ) : (
-            <View style={styles.buttonRow}>
-              <Pressable style={styles.exitButton} onPress={handleExit}>
-                <Text style={styles.exitButtonText}>Exit</Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.navButton,
-                  currentStep === 0 && styles.buttonDisabled,
-                ]}
+            <View style={{ flexDirection: "row", gap: 8 }}>
+              <Button
+                title="Exit"
+                color="secondary"
+                variant="filled"
+                size="md"
+                onPress={handleExit}
+                style={{ flex: 1 }}
+              />
+              <Button
+                title="Previous"
+                variant="outlined"
+                size="md"
                 onPress={handlePrevious}
                 disabled={currentStep === 0}
-              >
-                <Text style={styles.navButtonText}>Previous</Text>
-              </Pressable>
-              <Pressable style={styles.navButton} onPress={handleNext}>
-                <Text style={styles.navButtonText}>Next</Text>
-              </Pressable>
+                style={{ flex: 1 }}
+              />
+              <Button
+                title="Next"
+                size="md"
+                onPress={handleNext}
+                style={{ flex: 1 }}
+              />
             </View>
           )}
         </View>
       </View>
 
-      {isDrawerOpen && (
-        <View style={styles.drawer}>
-          <View style={styles.drawerHeader}>
-            <Text style={styles.drawerTitle}>Ingredients</Text>
-            <Pressable onPress={() => setIsDrawerOpen(false)}>
-              <MaterialIcons name="close" size={24} color="#666" />
-            </Pressable>
-          </View>
-          <View style={styles.drawerContent}>
-            {item.ingredients?.map((ingredient, index) => (
-              <Text key={index} style={styles.ingredient}>
-                • {ingredient}
-              </Text>
-            ))}
-          </View>
-        </View>
-      )}
+      <IngredientsDrawer
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        ingredients={item.ingredients || []}
+      />
 
       <RatingModal
-        isVisible={isRatingModalVisible}
+        visible={isRatingModalVisible}
         onClose={handleCloseRating}
         onSubmit={handleRating}
-        itemTitle={item.title}
       />
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  image: {
-    height: 300,
-  },
-  content: {
-    flex: 1,
-    padding: 16,
-  },
-  stepHeader: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-  },
-  instruction: {
-    fontSize: 18,
-    lineHeight: 28,
-    marginBottom: 24,
-  },
-  progressContainer: {
-    marginTop: "auto",
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: "#eee",
-    borderRadius: 2,
-    marginBottom: 8,
-  },
-  progress: {
-    height: "100%",
-    backgroundColor: "#007AFF",
-    borderRadius: 2,
-  },
-  progressText: {
-    textAlign: "center",
-    color: "#666",
-  },
-  footer: {
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  exitButton: {
-    flex: 1,
-    backgroundColor: "#FF3B30",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  exitButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  navButton: {
-    flex: 1,
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  navButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  finishButton: {
-    backgroundColor: "#34C759",
-    borderRadius: 8,
-    padding: 16,
-    alignItems: "center",
-  },
-  finishButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  headerButton: {
-    padding: 8,
-    marginRight: 8,
-  },
-  drawer: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 300,
-    backgroundColor: "white",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: -2,
-      height: 0,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  drawerHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  drawerTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-  },
-  drawerContent: {
-    padding: 16,
-  },
-  ingredient: {
-    fontSize: 16,
-    marginBottom: 12,
-    lineHeight: 24,
-  },
-});

@@ -1,11 +1,10 @@
 import { View, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
-import { ProfileHeader } from "@/components/composite/Headers/ProfileHeader"; // Adjust path as needed
-import { ItemList } from "../../components/composite"; // Adjust path as needed
-import { useItems } from "../../hooks/useItems";
-import { supabase } from "../../lib/supabase";
-import { ProtectedRoute } from "../../components/protected/ProtectedRoute";
-import { Permission } from "../../lib/permissions"; // Adjust path as needed
+import { ItemList, ProfileHeader } from "@/components/composite";
+import { useItems } from "@/hooks/useItems";
+import { supabase } from "@/lib/supabase";
+import { ProtectedRoute } from "@/components/protected/ProtectedRoute";
+import { Permission } from "@/lib/permissions";
 
 export default function Profile() {
   // Wrap the entire component content in ProtectedRoute

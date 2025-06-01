@@ -2,7 +2,6 @@ import {
   View,
   Text,
   ScrollView,
-  Image,
   Pressable,
   StyleSheet,
   ActivityIndicator,
@@ -12,7 +11,8 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useItem } from "../../hooks/useItem";
 import { useAuth } from "../../contexts/auth/AuthContext";
 import { Share } from "react-native";
-import FavoriteButton from "../../components/FavoriteButton";
+import { Image } from "@/components/ui";
+import { ItemDetails } from "@/components/composite";
 
 export default function ItemDetail() {
   const { id } = useLocalSearchParams();
@@ -72,26 +72,36 @@ export default function ItemDetail() {
           style={styles.image}
           resizeMode="cover"
         />
-        <View style={styles.details}>
-          {/* <ItemHeader
+        <ItemDetails
+          id={item.id}
+          title={item.title}
+          category={item.category}
+          rating={item.average_rating || 0}
+          description={item.description}
+          ingredients={item.ingredients || []}
+        />
+        {/* <View style={styles.details}>
+          <ItemHeader
+            id={item.id}
             title={item.title}
             category={item.category}
-            averageRating={item.average_rating}
+            rating={item.average_rating || 0}
           /> */}
-          <View style={styles.headerContainer}>
+        {/* <View style={styles.headerContainer}>
             <View style={styles.headerTop}>
               <Text style={styles.title}>{item.title}</Text>
               <FavoriteButton itemId={item.id} size={20} />
             </View>
-            <View style={styles.ratingContainer}>
+            <RatingDisplay value={item.average_rating || 0} /> */}
+        {/* <View style={styles.ratingContainer}>
               <MaterialIcons name="star" size={20} color="#FFD700" />
               <Text style={styles.rating}>
                 {item.average_rating?.toFixed(1) || "N/A"}
               </Text>
-            </View>
-            <Text style={styles.category}>{item.category}</Text>
-          </View>
-          <View style={styles.section}>
+            </View> */}
+        {/* <Text style={styles.category}>{item.category}</Text>
+          </View> */}
+        {/* <View style={styles.section}>
             <Text style={styles.description}>{item.description}</Text>
           </View>
           <View style={styles.divider} />
@@ -103,7 +113,7 @@ export default function ItemDetail() {
               </Text>
             ))}
           </View>
-        </View>
+        </View> */}
       </ScrollView>
       <View style={styles.footer}>
         <Pressable style={styles.startButton} onPress={handleStartRecipe}>

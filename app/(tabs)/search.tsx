@@ -1,6 +1,6 @@
 import { View, StyleSheet } from "react-native";
-import { useItems } from "../../hooks/useItems";
-import { SearchBar, ItemList } from "../../components/composite";
+import { useItems } from "@/hooks/useItems";
+import { SearchBar, ItemList } from "@/components/composite";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
