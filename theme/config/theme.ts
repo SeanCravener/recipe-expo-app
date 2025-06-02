@@ -10,7 +10,7 @@ import {
   shades,
   lineHeight,
 } from "@/theme/constants";
-import { ThemeStructure } from "../types/theme";
+import { ThemeStructure } from "@/theme/types";
 
 // Theme configuration for light and dark modes
 export const theme: ThemeStructure = {

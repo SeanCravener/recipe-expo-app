@@ -1,4 +1,4 @@
-import { BorderRadius } from "@/theme/interfaces/borderRadius";
+import { BorderRadius } from "@/theme/interfaces";
 
 export const borderRadius: BorderRadius = {
   none: 0,

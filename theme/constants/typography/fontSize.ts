@@ -1,4 +1,4 @@
-import { FontSize } from "@/theme/interfaces/typography/fontSize";
+import { FontSize } from "@/theme/interfaces";
 
 export const fontSize: FontSize = {
   xs: 12,
