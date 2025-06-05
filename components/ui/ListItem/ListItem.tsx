@@ -1,71 +1,67 @@
-import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { GestureResponderEvent, StyleProp, ViewStyle } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
-import { Icon, Text, View } from "@/components/ui";
+import {
+  StyleProp,
+  ViewStyle,
+  TextStyle,
+  ImageSourcePropType,
+} from "react-native";
 
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
+import { useTheme } from "@/theme/hooks/useTheme";
+import { ListItemVariant } from "@/theme/types/componentVariants";
+
+import { View, Image, Text } from "@/components/ui";
 
 interface ListItemProps {
+  variant?: ListItemVariant; // "default" | "inset"
   title: string;
   subtitle?: string;
-  icon?: keyof typeof Feather.glyphMap;
-  iconColor?: ColorKey;
-  onPress?: (event: GestureResponderEvent) => void;
-  right?: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
+  leftIcon?: ImageSourcePropType;
+  /** Optional trailing element (e.g., delete icon) */
+  rightElement?: React.ReactNode;
+
+  containerStyle?: StyleProp<ViewStyle>;
+  titleStyle?: StyleProp<TextStyle>;
+  subtitleStyle?: StyleProp<TextStyle>;
 }
 
 export const ListItem: React.FC<ListItemProps> = ({
+  variant = "default",
   title,
   subtitle,
-  icon,
-  iconColor = "onSurface",
-  onPress,
-  right,
-  style,
+  leftIcon,
+  rightElement,
+  containerStyle,
+  titleStyle,
+  subtitleStyle,
 }) => {
+  const { theme } = useTheme();
+  const {
+    container,
+    title: titleDS,
+    subtitle: subtitleDS,
+  } = theme.components.listItem[variant];
+
   return (
     <View
-      padding="md"
-      backgroundColor="surface"
-      style={[
-        {
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottomWidth: 1,
-          borderColor: "#eee",
-        },
-        style,
-      ]}
+      variant="row"
+      style={[container, containerStyle, { paddingRight: theme.spacing.md }]}
     >
-      <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-        {icon && (
-          <Icon
-            name={icon}
-            color={iconColor}
-            size={20}
-            style={{ marginRight: 12 }}
-          />
+      {leftIcon && (
+        <Image
+          source={leftIcon}
+          variant="thumbnail"
+          style={{ marginRight: theme.spacing.sm }}
+        />
+      )}
+
+      <View style={{ flex: 1 }}>
+        <Text style={[titleDS, titleStyle]}>{title}</Text>
+        {subtitle && (
+          <Text style={[subtitleDS, subtitleStyle]}>{subtitle}</Text>
         )}
-        <View style={{ flex: 1 }}>
-          <Text
-            variant="body"
-            fontWeight="medium"
-            color="onSurface"
-            style={{ marginBottom: subtitle ? 2 : 0 }}
-          >
-            {title}
-          </Text>
-          {subtitle && (
-            <Text variant="label" color="onSurfaceVariant">
-              {subtitle}
-            </Text>
-          )}
-        </View>
       </View>
-      {right && <View>{right}</View>}
+
+      {rightElement}
     </View>
   );
 };

@@ -1,82 +1,52 @@
 import React from "react";
-import {
-  ImageSourcePropType,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-} from "react-native";
-import { useTheme } from "@/hooks/useTheme";
-import { Image, Text, View } from "@/components/ui";
+import { ImageSourcePropType } from "react-native";
 
-type Size = "sm" | "md" | "lg" | "xl";
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
+import { useTheme } from "@/theme/hooks/useTheme";
+import { AvatarVariant } from "@/theme/types/componentVariants";
+
+import { Image, View, Text } from "@/components/ui";
 
 interface AvatarProps {
-  size?: Size;
-  source?: ImageSourcePropType;
-  label?: string;
-  backgroundColor?: ColorKey;
-  textColor?: ColorKey;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
+  variant?: AvatarVariant; // "sm" | "md" | "lg"
+  source?: ImageSourcePropType; // optional picture
+  initials?: string; // fallback initials
+  style?: any; // extra style overrides
 }
 
 export const Avatar: React.FC<AvatarProps> = ({
-  size = "md",
+  variant = "md",
   source,
-  label,
-  backgroundColor = "primary",
-  textColor = "onPrimary",
+  initials,
   style,
-  textStyle,
 }) => {
   const { theme } = useTheme();
+  const baseStyle = theme.components.avatar[variant];
 
-  const sizeMap: Record<Size, number> = {
-    sm: 32,
-    md: 48,
-    lg: 64,
-    xl: 80,
-  };
+  if (source) {
+    // Image branch (baseStyle is ImageStyle)
+    return (
+      <Image source={source} style={[baseStyle, style]} variant="contain" />
+    );
+  }
 
-  const avatarSize = sizeMap[size];
+  // Fallback View branch needs a ViewStyle
+  const viewStyle = {
+    ...baseStyle,
+    alignItems: "center",
+    justifyContent: "center",
+  } as const;
 
   return (
-    <View
-      backgroundColor={source ? undefined : backgroundColor}
-      style={[
-        {
-          width: avatarSize,
-          height: avatarSize,
-          borderRadius: theme.borderRadius.round,
-          overflow: "hidden",
-          alignItems: "center",
-          justifyContent: "center",
-        },
-        style,
-      ]}
-    >
-      {source ? (
-        <Image
-          source={source}
-          radius="round"
-          style={{
-            width: avatarSize,
-            height: avatarSize,
-          }}
-        />
-      ) : (
+    <View style={[viewStyle, style]}>
+      {initials && (
         <Text
-          color={textColor}
-          fontWeight="medium"
-          style={[
-            {
-              fontSize: avatarSize / 2.5,
-            },
-            textStyle,
-          ]}
+          style={{
+            color: theme.colors.onSurface,
+            fontSize: theme.fontSize.sm,
+            fontWeight: theme.fontWeight.bold as any,
+          }}
         >
-          {label}
+          {initials}
         </Text>
       )}
     </View>

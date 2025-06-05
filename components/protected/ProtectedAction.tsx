@@ -25,7 +25,7 @@ export function ProtectedAction({
 
     return (
       <Pressable
-        onPress={() => router.push("/(auth)/sign-in")}
+        onPress={() => router.push("/auth")}
         style={styles.signInButton}
       >
         <Text style={styles.signInText}>

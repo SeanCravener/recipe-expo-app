@@ -1,61 +1,40 @@
 import React from "react";
-import { Pressable } from "react-native";
-import { Text, Scroll } from "@/components/ui";
-import { useTheme } from "@/hooks/useTheme";
+import { Pressable, StyleProp, ViewStyle, TextStyle } from "react-native";
+
+import { useTheme } from "@/theme/hooks/useTheme";
+import { ToggleTextVariant } from "@/theme/types/componentVariants";
+
+import { View, Text } from "@/components/ui";
 
 interface ToggleTextProps {
-  options: string[];
-  selected: string;
-  onChange: (value: string) => void;
-  maxOptions?: number;
+  variant?: ToggleTextVariant; // "pill" | "underline"
+  active?: boolean;
+  onPress?: () => void;
+  containerStyle?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
+  children: React.ReactNode;
 }
 
 export const ToggleText: React.FC<ToggleTextProps> = ({
-  options,
-  selected,
-  onChange,
-  maxOptions = 5,
+  variant = "underline",
+  active = false,
+  onPress,
+  containerStyle,
+  labelStyle,
+  children,
 }) => {
   const { theme } = useTheme();
-  const visibleOptions = options.slice(0, maxOptions);
+  const { container, label } = theme.components.toggleText[variant];
+
+  const activeStyle: TextStyle | undefined = active
+    ? { color: theme.colors.primary }
+    : undefined;
 
   return (
-    <Scroll
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      backgroundColor="surfaceVariant"
-      radius="xl"
-      padding="xs"
-      style={{ flexDirection: "row" }}
-    >
-      {visibleOptions.map((option) => {
-        const isActive = option === selected;
-        return (
-          <Pressable
-            key={option}
-            onPress={() => onChange(option)}
-            style={{
-              paddingVertical: 8,
-              paddingHorizontal: 16,
-              borderRadius: theme.borderRadius.lg,
-              backgroundColor: isActive
-                ? theme.colors.primary
-                : theme.colors.surfaceVariant,
-              justifyContent: "center",
-              alignItems: "center",
-              marginRight: 4,
-            }}
-          >
-            <Text
-              variant="label"
-              color={isActive ? "onPrimary" : "onSurfaceVariant"}
-              fontWeight={isActive ? "bold" : "medium"}
-            >
-              {option}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </Scroll>
+    <Pressable onPress={onPress}>
+      <View style={[container, containerStyle]}>
+        <Text style={[label, activeStyle, labelStyle]}>{children}</Text>
+      </View>
+    </Pressable>
   );
 };

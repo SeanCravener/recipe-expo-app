@@ -2,89 +2,33 @@ import React from "react";
 import {
   TextInput,
   TextInputProps,
-  StyleSheet,
+  StyleProp,
   ViewStyle,
   TextStyle,
-  Pressable,
 } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
-import { Text, Icon, View } from "@/components/ui";
 
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
+import { useTheme } from "@/theme/hooks/useTheme";
+import { InputVariant } from "@/theme/types/componentVariants";
+import { View } from "@/components/ui";
 
-interface InputProps extends TextInputProps {
-  label?: string;
-  color?: ColorKey;
-  containerStyle?: ViewStyle;
-  style?: TextStyle;
-  rightIcon?: string;
-  onRightIconPress?: () => void;
+interface InputProps extends Omit<TextInputProps, "style"> {
+  variant?: InputVariant; // "default" | "sm" | "lg"
+  containerStyle?: StyleProp<ViewStyle>;
+  fieldStyle?: StyleProp<TextStyle>;
 }
 
 export const Input: React.FC<InputProps> = ({
-  label,
-  color = "primary",
+  variant = "default",
   containerStyle,
-  style,
-  rightIcon,
-  onRightIconPress,
+  fieldStyle,
   ...rest
 }) => {
   const { theme } = useTheme();
+  const { container, field } = theme.components.input[variant];
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      {label && (
-        <Text
-          variant="label"
-          color="onSurface"
-          style={{ marginBottom: theme.spacing.xs }}
-        >
-          {label}
-        </Text>
-      )}
-      <View
-        backgroundColor={color}
-        borderRadius="md"
-        style={styles.inputWrapper}
-      >
-        <TextInput
-          style={[
-            styles.input,
-            {
-              color: theme.colors.onPrimary,
-              fontSize: theme.typography.fontSize.md,
-              fontFamily: theme.typography.fontFamily.regular,
-            },
-            style,
-          ]}
-          placeholderTextColor={theme.colors.onPrimary}
-          {...rest}
-        />
-        {rightIcon && onRightIconPress && (
-          <Pressable onPress={onRightIconPress} style={styles.iconContainer}>
-            <Icon name={rightIcon} size={20} color="onPrimary" />
-          </Pressable>
-        )}
-      </View>
+    <View style={[container, containerStyle]}>
+      <TextInput style={[field, fieldStyle]} {...rest} />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-  },
-  inputWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-  },
-  input: {
-    flex: 1,
-    paddingVertical: 12,
-  },
-  iconContainer: {
-    paddingLeft: 8,
-  },
-});

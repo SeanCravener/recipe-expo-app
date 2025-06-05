@@ -1,44 +1,36 @@
 import React from "react";
-import { ActivityIndicator, StyleProp, ViewStyle } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
+import { ActivityIndicator } from "react-native";
+
+import { useTheme } from "@/theme/hooks/useTheme";
+import { LoadingVariant } from "@/theme/types/componentVariants";
 import { View } from "@/components/ui";
 
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
-
 interface LoadingProps {
-  color?: ColorKey;
-  size?: number | "small" | "large";
-  fullScreen?: boolean;
-  style?: StyleProp<ViewStyle>;
+  variant?: LoadingVariant; // "spinner" | "overlay"
+  colorScheme?: "primary" | "surface"; // optional palette override
 }
 
 export const Loading: React.FC<LoadingProps> = ({
-  color = "primary",
-  size = "large",
-  fullScreen = false,
-  style,
+  variant = "spinner",
+  colorScheme = "primary",
 }) => {
   const { theme } = useTheme();
+  const spinnerColor =
+    colorScheme === "primary" ? theme.colors.primary : theme.colors.onSurface;
 
-  if (fullScreen) {
+  if (variant === "overlay") {
+    const overlayStyle = theme.components.loading.overlay;
     return (
-      <View
-        backgroundColor="background"
-        style={[
-          {
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-          },
-          style,
-        ]}
-      >
-        <ActivityIndicator size={size} color={theme.colors[color]} />
+      <View style={overlayStyle}>
+        <ActivityIndicator color={spinnerColor} />
       </View>
     );
   }
 
+  const spinnerStyle = theme.components.loading.spinner;
   return (
-    <ActivityIndicator size={size} color={theme.colors[color]} style={style} />
+    <View style={spinnerStyle}>
+      <ActivityIndicator color={spinnerColor} />
+    </View>
   );
 };

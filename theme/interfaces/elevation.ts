@@ -1,8 +1,10 @@
+import { ViewStyle } from "react-native";
+
 export interface Elevation {
-  level0: string;
-  level1: string;
-  level2: string;
-  level3: string;
-  level4: string;
-  level5: string;
+  level0: ViewStyle;
+  level1: ViewStyle;
+  level2: ViewStyle;
+  level3: ViewStyle;
+  level4: ViewStyle;
+  level5: ViewStyle;
 }

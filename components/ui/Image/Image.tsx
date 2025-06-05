@@ -1,42 +1,60 @@
+// components/ui/Image/Image.tsx
 import React from "react";
 import {
-  ImageStyle,
   Image as RNImage,
   ImageProps as RNImageProps,
+  ImageSourcePropType,
+  ImageStyle,
   StyleProp,
 } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
 
-type RadiusKey = keyof ReturnType<typeof useTheme>["theme"]["borderRadius"];
-type ElevationKey = keyof ReturnType<typeof useTheme>["theme"]["elevation"];
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
-type OpacityKey = keyof ReturnType<typeof useTheme>["theme"]["opacity"];
+import { useTheme } from "@/theme/hooks/useTheme";
+import { ImageVariant } from "@/theme/types/componentVariants";
+import { BorderRadiusKey, SpacingKey } from "@/theme/types/keys";
 
-interface CustomImageProps extends RNImageProps {
-  radius?: RadiusKey;
-  elevation?: ElevationKey;
-  opacity?: OpacityKey;
-  backgroundColor?: ColorKey;
+/**
+ * Design-system Image.
+ * • Pulls default style from theme.components.image[variant]
+ * • Allows token-based overrides without conflicting
+ *   with native Image props.
+ */
+export interface ThemedImageProps
+  extends Omit<RNImageProps, "source" | "style"> {
+  /** Variant key: "thumbnail" | "cover" | "contain" */
+  variant?: ImageVariant;
+  /** Required image source */
+  source: ImageSourcePropType;
+
+  /** Token overrides (renamed to avoid prop collision) */
+  borderRadiusToken?: BorderRadiusKey;
+  marginToken?: SpacingKey;
+
+  /** Extra style overrides */
   style?: StyleProp<ImageStyle>;
 }
 
-export const Image: React.FC<CustomImageProps> = ({
-  radius = "none",
-  elevation = "level0",
-  opacity = "full",
-  backgroundColor = "transparent",
+export const Image: React.FC<ThemedImageProps> = ({
+  variant = "cover",
+  source,
+  borderRadiusToken,
+  marginToken,
   style,
   ...rest
 }) => {
   const { theme } = useTheme();
 
-  const themedStyle: ImageStyle = {
-    borderRadius: theme.borderRadius[radius],
-    backgroundColor: theme.colors[backgroundColor],
-    opacity: theme.opacity[opacity],
-    ...theme.elevation[elevation],
-    overflow: "hidden",
+  // base design-system style
+  const baseStyle: ImageStyle = theme.components.image[variant];
+
+  // token overrides
+  const override: ImageStyle = {
+    ...(borderRadiusToken && {
+      borderRadius: theme.borderRadius[borderRadiusToken],
+    }),
+    ...(marginToken && { margin: theme.spacing[marginToken] }),
   };
 
-  return <RNImage style={[themedStyle, style]} {...rest} />;
+  return (
+    <RNImage source={source} style={[baseStyle, override, style]} {...rest} />
+  );
 };

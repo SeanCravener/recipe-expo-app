@@ -1,3 +1,5 @@
+// components/ui/View/View.tsx   (replace the entire file)
+
 import React from "react";
 import {
   View as RNView,
@@ -5,52 +7,69 @@ import {
   StyleProp,
   ViewStyle,
 } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
 
-type SpacingKey = keyof ReturnType<typeof useTheme>["theme"]["spacing"];
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
-type RadiusKey = keyof ReturnType<typeof useTheme>["theme"]["borderRadius"];
-type ElevationKey = keyof ReturnType<typeof useTheme>["theme"]["elevation"];
-type ZIndexKey = keyof ReturnType<typeof useTheme>["theme"]["zIndex"];
-type OpacityKey = keyof ReturnType<typeof useTheme>["theme"]["opacity"];
+import { useTheme } from "@/theme/hooks/useTheme";
 
-interface CustomViewProps extends RNViewProps {
+// token key unions
+import {
+  SpacingKey,
+  ColorKey,
+  BorderRadiusKey,
+  ElevationKey,
+} from "@/theme/types/keys";
+
+// layout-variant union
+import { ViewVariant } from "@/theme/types/componentVariants";
+
+/**
+ * Design-system View that pulls a layout variant from theme.components.view
+ * but still allows fine-grained token overrides.
+ */
+interface ThemedViewProps extends RNViewProps {
+  /** layout variant key (e.g. "centered", "card-square") */
+  variant?: ViewVariant;
+
+  /** optional per-prop token overrides */
   padding?: SpacingKey;
   margin?: SpacingKey;
   backgroundColor?: ColorKey;
-  borderRadius?: RadiusKey;
+  borderRadius?: BorderRadiusKey;
   elevation?: ElevationKey;
-  zIndex?: ZIndexKey;
-  opacity?: OpacityKey;
+
   style?: StyleProp<ViewStyle>;
 }
 
-export const View: React.FC<CustomViewProps> = ({
+export const View: React.FC<ThemedViewProps> = ({
+  variant = "default",
   padding,
   margin,
-  backgroundColor = "background",
+  backgroundColor,
   borderRadius,
-  elevation = "level0",
-  zIndex = "base",
-  opacity = "full",
+  elevation,
   style,
   children,
   ...rest
 }) => {
   const { theme } = useTheme();
 
-  const baseStyle: ViewStyle = {
+  // 1) base style from the selected variant
+  const variantStyle: ViewStyle = theme.components.view[variant];
+
+  // 2) optional token-based overrides
+  const overrideStyle: ViewStyle = {
     ...(padding && { padding: theme.spacing[padding] }),
     ...(margin && { margin: theme.spacing[margin] }),
-    backgroundColor: theme.colors[backgroundColor],
-    ...(borderRadius && { borderRadius: theme.borderRadius[borderRadius] }),
+    ...(backgroundColor && {
+      backgroundColor: theme.colors[backgroundColor],
+    }),
+    ...(borderRadius && {
+      borderRadius: theme.borderRadius[borderRadius],
+    }),
     ...(elevation && theme.elevation[elevation]),
-    zIndex: theme.zIndex[zIndex],
-    opacity: theme.opacity[opacity],
   };
 
   return (
-    <RNView style={[baseStyle, style]} {...rest}>
+    <RNView style={[variantStyle, overrideStyle, style]} {...rest}>
       {children}
     </RNView>
   );

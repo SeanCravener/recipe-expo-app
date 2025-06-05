@@ -1,43 +1,29 @@
 import React from "react";
-import { StyleProp, TextStyle, ViewStyle } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
-import { Text, View } from "@/components/ui";
+import { StyleProp, ViewStyle, TextStyle } from "react-native";
+
+import { useTheme } from "@/theme/hooks/useTheme";
+import { ErrorVariant } from "@/theme/types/componentVariants";
+import { View, Text } from "@/components/ui";
 
 interface ErrorProps {
-  title?: string;
-  message: string;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
+  variant?: ErrorVariant; // "text" | "box"
+  message: React.ReactNode;
+  containerStyle?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
 }
 
 export const Error: React.FC<ErrorProps> = ({
-  title,
+  variant = "text",
   message,
-  style,
-  textStyle,
+  containerStyle,
+  labelStyle,
 }) => {
   const { theme } = useTheme();
+  const { container, label } = theme.components.error[variant];
 
   return (
-    <View
-      backgroundColor="errorContainer"
-      padding="md"
-      borderRadius="md"
-      style={style}
-    >
-      {title && (
-        <Text
-          variant="title"
-          fontWeight="bold"
-          color="onErrorContainer"
-          style={{ marginBottom: theme.spacing.xs }}
-        >
-          {title}
-        </Text>
-      )}
-      <Text variant="body" color="onErrorContainer" style={textStyle}>
-        {message}
-      </Text>
+    <View style={[container, containerStyle]}>
+      <Text style={[label, labelStyle]}>{message}</Text>
     </View>
   );
 };

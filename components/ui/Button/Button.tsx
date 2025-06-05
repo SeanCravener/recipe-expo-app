@@ -1,105 +1,82 @@
 import React from "react";
 import {
-  GestureResponderEvent,
+  Pressable,
+  ActivityIndicator,
   StyleProp,
-  TextStyle,
-  TouchableOpacity,
   ViewStyle,
+  TextStyle,
+  PressableStateCallbackType,
 } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
+
+import { useTheme } from "@/theme/hooks/useTheme";
+import { ButtonVariant, ButtonSize } from "@/theme/types/componentVariants";
+
 import { Text } from "@/components/ui";
 
-type Variant = "filled" | "outlined" | "text";
-type ColorKey = "primary" | "secondary" | "tertiary";
-type RadiusKey = keyof ReturnType<typeof useTheme>["theme"]["borderRadius"];
-type ElevationKey = keyof ReturnType<typeof useTheme>["theme"]["elevation"];
-type Size = "sm" | "md" | "lg";
+export interface ButtonProps
+  extends Omit<React.ComponentProps<typeof Pressable>, "style"> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  fullWidth?: boolean;
+  loading?: boolean;
 
-interface ButtonProps {
-  title: string;
-  onPress: (event: GestureResponderEvent) => void;
-  variant?: Variant;
-  color?: ColorKey;
-  radius?: RadiusKey;
-  elevation?: ElevationKey;
-  size?: Size;
-  disabled?: boolean;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
+  /** Optional overrides */
+  containerStyle?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
+
+  /**
+   * Optional Pressable.style callback or style object/array.
+   * We add it back explicitly so TypeScript knows it exists.
+   */
+  style?:
+    | StyleProp<ViewStyle>
+    | ((state: PressableStateCallbackType) => StyleProp<ViewStyle>);
+  children: React.ReactNode;
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  title,
-  onPress,
-  variant = "filled",
-  color = "primary",
-  radius = "md",
-  elevation = "level1",
+  variant = "primary",
   size = "md",
-  disabled = false,
+  fullWidth = false,
+  loading = false,
+  disabled,
+  children,
+  containerStyle,
+  labelStyle,
   style,
-  textStyle,
+  ...rest
 }) => {
   const { theme } = useTheme();
+  const { container, label } = theme.components.button[variant][size];
 
-  const sizePaddingMap: Record<Size, { vertical: number; horizontal: number }> =
-    {
-      sm: {
-        vertical: theme.spacing.xs,
-        horizontal: theme.spacing.md,
-      },
-      md: {
-        vertical: theme.spacing.sm,
-        horizontal: theme.spacing.lg,
-      },
-      lg: {
-        vertical: theme.spacing.md,
-        horizontal: theme.spacing.xl,
-      },
-    };
+  const fullWidthStyle: ViewStyle | undefined = fullWidth
+    ? { alignSelf: "stretch", width: "100%" }
+    : undefined;
 
-  const background = variant === "filled" ? theme.colors[color] : "transparent";
+  const disabledStyle: ViewStyle | undefined = disabled
+    ? { opacity: 0.5 }
+    : undefined;
 
-  const borderColor =
-    variant === "outlined" ? theme.colors[color] : "transparent";
+  /** base array used for both object and callback forms */
+  const baseArray: StyleProp<ViewStyle> = [
+    container,
+    fullWidthStyle,
+    disabledStyle,
+    containerStyle,
+  ];
 
-  const textColor =
-    variant === "filled"
-      ? theme.colors[`on${capitalize(color)}` as keyof typeof theme.colors]
-      : theme.colors[color];
+  const pressableStyle =
+    typeof style === "function"
+      ? (state: PressableStateCallbackType) => [...baseArray, style(state)]
+      : [...baseArray, style];
 
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      disabled={disabled}
-      style={[
-        {
-          backgroundColor: disabled ? theme.colors.surfaceVariant : background,
-          borderRadius: theme.borderRadius[radius],
-          borderWidth: variant === "outlined" ? 1 : 0,
-          borderColor,
-          paddingVertical: sizePaddingMap[size].vertical,
-          paddingHorizontal: sizePaddingMap[size].horizontal,
-          opacity: disabled ? theme.opacity.disabled : 1,
-          alignItems: "center",
-          justifyContent: "center",
-          ...(elevation && theme.elevation[elevation]),
-        },
-        style,
-      ]}
-    >
-      <Text
-        variant="label"
-        fontWeight="medium"
-        color={textColor as ColorKey}
-        style={textStyle}
-      >
-        {title}
-      </Text>
-    </TouchableOpacity>
+    <Pressable disabled={disabled || loading} style={pressableStyle} {...rest}>
+      {loading ? (
+        <ActivityIndicator color={label.color as string} />
+      ) : (
+        <Text style={[label, labelStyle]}>{children}</Text>
+      )}
+    </Pressable>
   );
 };
-
-function capitalize(text: string) {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}

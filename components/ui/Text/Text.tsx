@@ -1,3 +1,5 @@
+// components/ui/Text/Text.tsx   (replace entire file)
+
 import React from "react";
 import {
   Text as RNText,
@@ -5,45 +7,57 @@ import {
   StyleProp,
   TextStyle,
 } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
 
-type Variant = keyof ReturnType<
-  typeof useTheme
->["theme"]["typography"]["fontSize"];
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
-type FontWeight = keyof ReturnType<
-  typeof useTheme
->["theme"]["typography"]["fontFamily"];
+import { useTheme } from "@/theme/hooks/useTheme";
+import { TextVariant } from "@/theme/types/componentVariants";
+import {
+  ColorKey,
+  FontSizeKey,
+  FontWeightKey,
+  LineHeightKey,
+} from "@/theme/types/keys";
 
-interface CustomTextProps extends RNTextProps {
-  variant?: Variant;
-  color?: ColorKey;
-  fontWeight?: FontWeight;
-  align?: TextStyle["textAlign"];
+/**
+ * Themed Text component.
+ * - Pulls default style from theme.components.text[variant]
+ * - Allows token overrides for color, size, weight, lineHeight
+ */
+export interface ThemedTextProps extends RNTextProps {
+  variant?: TextVariant; // "heading" | "body" | "caption"
+
+  color?: ColorKey; // theme color token
+  fontSize?: FontSizeKey; // override size token
+  fontWeight?: FontWeightKey; // override weight token
+  lineHeight?: LineHeightKey; // override line-height token
+
   style?: StyleProp<TextStyle>;
 }
 
-export const Text: React.FC<CustomTextProps> = ({
-  children,
+export const Text: React.FC<ThemedTextProps> = ({
   variant = "body",
-  color = "onBackground",
-  fontWeight = "regular",
-  align = "left",
+  color,
+  fontSize,
+  fontWeight,
+  lineHeight,
   style,
+  children,
   ...rest
 }) => {
   const { theme } = useTheme();
 
-  const textStyle: TextStyle = {
-    fontSize: theme.typography.fontSize[variant],
-    fontFamily: theme.typography.fontFamily[fontWeight],
-    color: theme.colors[color],
-    textAlign: align,
-    lineHeight: theme.typography.lineHeight.normal,
+  // ① base style from theme variant
+  const baseStyle: TextStyle = theme.components.text[variant];
+
+  // ② token overrides (optional)
+  const override: TextStyle = {
+    ...(color && { color: theme.colors[color] }),
+    ...(fontSize && { fontSize: theme.fontSize[fontSize] }),
+    ...(fontWeight && { fontWeight: theme.fontWeight[fontWeight] as any }),
+    ...(lineHeight && { lineHeight: theme.lineHeight[lineHeight] }),
   };
 
   return (
-    <RNText style={[textStyle, style]} {...rest}>
+    <RNText style={[baseStyle, override, style]} {...rest}>
       {children}
     </RNText>
   );

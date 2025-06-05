@@ -14,4 +14,5 @@ export interface ThemeConfig {
   spacing: Spacing;
   borderRadius: BorderRadius;
   elevation: Elevation;
+  components: import("./components").ComponentsMapping;
 }
