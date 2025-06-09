@@ -1,7 +1,7 @@
-import { Text, StyleSheet } from "react-native";
-import { useItems } from "../../hooks/useItems";
-import { ItemList, SearchBar } from "../../components/composite";
-import { View } from "../../components/ui";
+import React from "react";
+import { useItems } from "@/hooks/useItems";
+import { ItemList } from "@/components/composite";
+import { View } from "@/components/ui";
 
 export default function Home() {
   const {
@@ -13,7 +13,7 @@ export default function Home() {
   } = useItems("general");
 
   return (
-    <View backgroundColor="surfaceContainer" style={{ flex: 1 }}>
+    <View variant="default" backgroundColor="background">
       <ItemList
         data={items}
         isLoading={isLoading}
@@ -25,10 +25,3 @@ export default function Home() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-});

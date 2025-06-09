@@ -1,7 +1,7 @@
-import { View, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View } from "@/components/ui";
 import { useItems } from "@/hooks/useItems";
 import { SearchBar, ItemList } from "@/components/composite";
-import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export default function Search() {
@@ -19,7 +19,7 @@ export default function Search() {
   }, 300);
 
   return (
-    <View style={styles.container}>
+    <View variant="default" backgroundColor="background">
       <SearchBar onSearch={debouncedSearch} />
       <ItemList
         data={items}
@@ -36,10 +36,3 @@ export default function Search() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-});

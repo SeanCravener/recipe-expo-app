@@ -2,7 +2,7 @@ import React from "react";
 import { useLocalSearchParams } from "expo-router";
 import { useItem } from "@/hooks/useItem";
 import { useEditItem } from "@/hooks/useEditItem";
-import { Loading } from "@/components/ui";
+import { View, Loading } from "@/components/ui";
 import { EditItemForm } from "@/components/composite";
 import { ItemFormData } from "@/types/item";
 
@@ -22,12 +22,24 @@ export default function EditItem() {
   };
 
   if (isLoading || !item) {
-    return <Loading fullScreen />;
+    return (
+      <View variant="centered" style={{ flex: 1 }}>
+        <Loading variant="spinner" />
+      </View>
+    );
   }
+
+  // Transform the item data to match ItemFormData structure
+  const initialValues: ItemFormData = {
+    ...item,
+    ingredients: (item.ingredients || []).map((ingredient) =>
+      typeof ingredient === "string" ? { value: ingredient } : ingredient
+    ),
+  };
 
   return (
     <EditItemForm
-      initialValues={item as ItemFormData}
+      initialValues={initialValues}
       onSubmit={handleSubmit}
       onDelete={handleDelete}
       isSaving={isEditing}

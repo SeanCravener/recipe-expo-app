@@ -1,5 +1,5 @@
-import { View, StyleSheet } from "react-native";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { View } from "@/components/ui";
 import { ItemList, ProfileHeader } from "@/components/composite";
 import { useItems } from "@/hooks/useItems";
 import { supabase } from "@/lib/supabase";
@@ -79,9 +79,9 @@ function ProfileContent() {
     activeTab === "created" ? fetchNextCreated : fetchNextFavorited;
 
   return (
-    <View style={styles.container}>
+    <View variant="default" backgroundColor="background">
       <ProfileHeader
-        avatarUri={avatarUrl} // Use fetched avatar URL
+        avatarUri={avatarUrl}
         activeTab={activeTab}
         onTabChange={handleTabChange}
       />
@@ -93,17 +93,10 @@ function ProfileContent() {
         fetchNextPage={fetchNextPage}
         emptyText={
           activeTab === "created"
-            ? "You haven’t created any items yet"
-            : "You haven’t favorited any items yet"
+            ? "You haven't created any items yet"
+            : "You haven't favorited any items yet"
         }
       />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f5f5f5",
-  },
-});

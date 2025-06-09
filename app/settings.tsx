@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { router } from "expo-router";
 import { useAuth } from "@/contexts/auth/AuthContext";
-import { useThemeContext } from "@/contexts/ThemeContext";
-import { View, Text, Button, ToggleText } from "@/components/ui";
+import { useTheme } from "@/theme/hooks/useTheme";
+import { View, Text, Button, ToggleText, Error } from "@/components/ui";
 
 export default function SettingsScreen() {
   const { session, signOut } = useAuth();
-  const { mode, setMode } = useThemeContext();
+  const { mode, setMode } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,9 +17,8 @@ export default function SettingsScreen() {
       await signOut();
       router.replace("/");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An error occurred during sign out"
-      );
+      const error = err as Error;
+      setError(error?.message || "An error occurred during sign out");
     } finally {
       setIsLoading(false);
     }
@@ -30,36 +29,58 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View padding="lg" style={{ justifyContent: "center", gap: 24, flex: 1 }}>
-      {error && (
-        <Text color="error" align="center">
-          {error}
-        </Text>
-      )}
+    <View variant="centered" padding="lg" style={{ flex: 1, gap: 24 }}>
+      {error && <Error variant="box" message={error} />}
 
-      <Text variant="title" align="center">
+      <Text variant="headerTwo" style={{ textAlign: "center" }}>
         Welcome, {session ? session.user.id : "Guest"}
       </Text>
 
-      <ToggleText
-        options={["Light", "Dark"]}
-        selected={mode === "dark" ? "Dark" : "Light"}
-        onChange={handleModeChange}
-      />
+      {/* Theme Toggle */}
+      <View style={{ alignItems: "center", gap: 8 }}>
+        <Text variant="bodyNormalBold" style={{ textAlign: "center" }}>
+          Theme
+        </Text>
+        <View variant="row" style={{ gap: 8 }}>
+          <ToggleText
+            variant="pill"
+            active={mode === "light"}
+            onPress={() => setMode("light")}
+          >
+            Light
+          </ToggleText>
 
+          <ToggleText
+            variant="pill"
+            active={mode === "dark"}
+            onPress={() => setMode("dark")}
+          >
+            Dark
+          </ToggleText>
+        </View>
+      </View>
+
+      {/* Authentication Button */}
       {session ? (
         <Button
-          title={isLoading ? "Logging out..." : "Log Out"}
+          variant="danger"
+          size="lg"
           onPress={handleSignOut}
-          color="secondary"
           disabled={isLoading}
-        />
+          loading={isLoading}
+          fullWidth
+        >
+          {isLoading ? "Logging out..." : "Log Out"}
+        </Button>
       ) : (
         <Button
-          title="Sign In"
+          variant="primary"
+          size="lg"
           onPress={() => router.push("/(auth)/auth")}
-          color="primary"
-        />
+          fullWidth
+        >
+          Sign In
+        </Button>
       )}
     </View>
   );

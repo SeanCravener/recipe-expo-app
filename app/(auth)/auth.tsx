@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import { View } from "react-native";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import { AuthForm } from "@/components/composite";
-import { Scroll, Text, ToggleText } from "@/components/ui";
+import { Scroll, View, ToggleText } from "@/components/ui";
 import type { SignInSchema, SignUpSchema } from "@/lib/schemas";
 
 export default function AuthScreen() {
@@ -26,35 +25,41 @@ export default function AuthScreen() {
         );
       }
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "An error occurred during authentication"
-      );
+      const error = err as Error;
+      setError(error?.message || "An error occurred during authentication");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <Scroll padding="lg">
-      <View style={{ alignItems: "center", marginBottom: 16 }}>
-        <ToggleText
-          options={["Sign In", "Sign Up"]}
-          selected={mode === "signIn" ? "Sign In" : "Sign Up"}
-          onChange={(value) =>
-            setMode(value === "Sign In" ? "signIn" : "signUp")
-          }
-        />
+    <Scroll variant="padded">
+      <View style={{ alignItems: "center", marginBottom: 24 }}>
+        <View variant="row" style={{ gap: 8 }}>
+          <ToggleText
+            variant="pill"
+            active={mode === "signIn"}
+            onPress={() => setMode("signIn")}
+          >
+            Sign In
+          </ToggleText>
+
+          <ToggleText
+            variant="pill"
+            active={mode === "signUp"}
+            onPress={() => setMode("signUp")}
+          >
+            Sign Up
+          </ToggleText>
+        </View>
       </View>
 
-      {error && (
-        <Text color="error" align="center" style={{ marginBottom: 12 }}>
-          {error}
-        </Text>
-      )}
-
-      <AuthForm mode={mode} onSubmit={handleSubmit} isLoading={isLoading} />
+      <AuthForm
+        mode={mode}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        error={error ? ({ message: error } as Error) : null}
+      />
     </Scroll>
   );
 }

@@ -25,7 +25,7 @@ export default function TabsLayout() {
       tabPress: (e: any) => {
         if (permission && !session) {
           e.preventDefault();
-          navigation.navigate("(auth)/sign-in");
+          navigation.navigate("(auth)/auth");
         }
       },
     });

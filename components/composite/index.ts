@@ -10,7 +10,6 @@ export * from "./Headers/ProfileHeader";
 export * from "./ItemFormField/ItemFormField";
 export * from "./CategorySelect/CategorySelect";
 export * from "./ImageUploadField/ImageUploadField";
-export * from "./InstructionsList/InstructionsList";
 export * from "./DynamicList/DynamicList";
 export * from "./IngredientsList/IngredientsList";
 export * from "./IngredientsDrawer/IngredientsDrawer";
