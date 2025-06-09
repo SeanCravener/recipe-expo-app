@@ -53,9 +53,83 @@ export const createButtonVariants = (
       return acc;
     }, {} as Record<ButtonSize, ButtonStyle>);
 
+  // outline variant builder
+  const buildOutline = (
+    borderColor: string,
+    textColor: string
+  ): Record<ButtonSize, ButtonStyle> =>
+    (Object.keys(sizes) as ButtonSize[]).reduce((acc, key) => {
+      const s = sizes[key];
+      acc[key] = {
+        container: {
+          backgroundColor: "transparent",
+          borderWidth: 1,
+          borderColor: borderColor,
+          paddingVertical: s.py,
+          paddingHorizontal: s.px,
+          borderRadius: theme.borderRadius.sm,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        label: {
+          color: textColor,
+          fontSize: s.fs,
+          fontWeight: theme.fontWeight.medium as any,
+        },
+      };
+      return acc;
+    }, {} as Record<ButtonSize, ButtonStyle>);
+
+  // link variant builder (no background, no border)
+  const buildLink = (textColor: string): Record<ButtonSize, ButtonStyle> =>
+    (Object.keys(sizes) as ButtonSize[]).reduce((acc, key) => {
+      const s = sizes[key];
+      acc[key] = {
+        container: {
+          backgroundColor: "transparent",
+          paddingVertical: s.py,
+          paddingHorizontal: s.px,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        label: {
+          color: textColor,
+          fontSize: s.fs,
+          fontWeight: theme.fontWeight.medium as any,
+          textDecorationLine: "underline",
+        },
+      };
+      return acc;
+    }, {} as Record<ButtonSize, ButtonStyle>);
+
+  // ghost variant builder (subtle hover-like background)
+  const buildGhost = (textColor: string): Record<ButtonSize, ButtonStyle> =>
+    (Object.keys(sizes) as ButtonSize[]).reduce((acc, key) => {
+      const s = sizes[key];
+      acc[key] = {
+        container: {
+          backgroundColor: theme.colors.surfaceHover,
+          paddingVertical: s.py,
+          paddingHorizontal: s.px,
+          borderRadius: theme.borderRadius.sm,
+          alignItems: "center",
+          justifyContent: "center",
+        },
+        label: {
+          color: textColor,
+          fontSize: s.fs,
+          fontWeight: theme.fontWeight.medium as any,
+        },
+      };
+      return acc;
+    }, {} as Record<ButtonSize, ButtonStyle>);
+
   return {
     primary: build(theme.colors.primary, theme.colors.onPrimary),
     secondary: build(theme.colors.secondary, theme.colors.onSecondary),
     danger: build(theme.colors.error, theme.colors.onError),
+    outline: buildOutline(theme.colors.primary, theme.colors.primary),
+    link: buildLink(theme.colors.primary),
+    ghost: buildGhost(theme.colors.onSurface),
   };
 };

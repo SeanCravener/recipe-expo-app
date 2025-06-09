@@ -1,6 +1,7 @@
+import React from "react";
 import { View, Text } from "@/components/ui";
 import { FavoriteButton, RatingDisplay } from "@/components/composite";
-import { useTheme } from "@/hooks/useTheme";
+import { Ingredient } from "@/types/item";
 
 export interface ItemDetailsProps {
   id: string;
@@ -8,7 +9,7 @@ export interface ItemDetailsProps {
   category: string;
   rating: number;
   description: string;
-  ingredients: string[];
+  ingredients: Ingredient[];
 }
 
 export const ItemDetails: React.FC<ItemDetailsProps> = ({
@@ -19,29 +20,50 @@ export const ItemDetails: React.FC<ItemDetailsProps> = ({
   description,
   ingredients,
 }) => {
-  const { theme } = useTheme();
-
   return (
-    <View padding="lg" style={{ gap: theme.spacing.md }}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text variant="headline" numberOfLines={1} style={{ flex: 1 }}>
+    <View padding="lg" style={{ gap: 16 }}>
+      {/* Header Section */}
+      <View variant="row" style={{ alignItems: "center" }}>
+        <Text
+          variant="headerThree"
+          numberOfLines={1}
+          style={{
+            flex: 1,
+            marginRight: 8,
+          }}
+        >
           {title}
         </Text>
         <FavoriteButton itemId={id} />
       </View>
 
+      {/* Rating and Category */}
       <RatingDisplay value={rating} displayType="full" size={20} />
-      <Text variant="label" color="onSurfaceVariant">
+
+      <Text variant="bodySmallRegular" color="onSurfaceVariant">
         {category}
       </Text>
 
-      <Text variant="body">{description}</Text>
-      <View style={{ marginTop: theme.spacing.sm }}>
-        {ingredients.map((ingredient, index) => (
-          <Text key={index} variant="body" color="onSurfaceVariant">
-            - {ingredient}
-          </Text>
-        ))}
+      {/* Description */}
+      <View style={{ marginTop: 8 }}>
+        <Text variant="bodyNormalBold" style={{ marginBottom: 8 }}>
+          Description
+        </Text>
+        <Text variant="bodyNormalRegular">{description}</Text>
+      </View>
+
+      {/* Ingredients */}
+      <View style={{ marginTop: 8 }}>
+        <Text variant="bodyNormalBold" style={{ marginBottom: 8 }}>
+          Ingredients ({ingredients.length})
+        </Text>
+        <View style={{ gap: 4 }}>
+          {ingredients.map((ingredient, index) => (
+            <Text key={index} variant="bodyNormalRegular" color="onSurface">
+              • {ingredient.value}
+            </Text>
+          ))}
+        </View>
       </View>
     </View>
   );

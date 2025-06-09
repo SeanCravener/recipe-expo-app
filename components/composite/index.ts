@@ -19,3 +19,4 @@ export * from "./Forms/AddItemForm";
 export * from "./Forms/EditItemForm";
 export * from "./ItemDetails/ItemHeader";
 export * from "./ItemDetails/ItemDetails";
+export * from "./InstructionFormField/InstructionFormField";

@@ -1,25 +1,29 @@
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Pressable } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import {
   SignInSchema,
   SignUpSchema,
   signInSchema,
   signUpSchema,
 } from "@/lib/schemas";
-import { useTheme } from "@/hooks/useTheme";
-import { Input, View, Text, Button, Icon } from "@/components/ui";
+import { useTheme } from "@/theme/hooks/useTheme";
+import { Input, View, Text, Button, Error } from "@/components/ui";
 
 interface AuthFormProps {
   mode: "signIn" | "signUp";
   onSubmit: (data: SignInSchema | SignUpSchema) => Promise<void>;
   isLoading: boolean;
+  error?: Error | null;
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({
   mode,
   onSubmit,
   isLoading,
+  error,
 }) => {
   const { theme } = useTheme();
   const [showPassword, setShowPassword] = useState(false);
@@ -45,24 +49,28 @@ export const AuthForm: React.FC<AuthFormProps> = ({
   };
 
   return (
-    <View padding="lg" style={{ gap: theme.spacing.lg }}>
+    <View padding="lg" style={{ gap: 24 }}>
       {/* Email Field */}
       <Controller
         control={control}
         name="email"
         render={({ field: { value, onChange } }) => (
-          <View style={{ gap: theme.spacing.xs }}>
+          <View>
             <Input
+              variant="default"
               placeholder="Email"
               autoCapitalize="none"
               keyboardType="email-address"
-              value={value}
+              value={value || ""}
               onChangeText={onChange}
             />
             {errors.email && (
-              <Text variant="label" color="error">
-                {errors.email.message as string}
-              </Text>
+              <View style={{ marginTop: 4 }}>
+                <Error
+                  variant="text"
+                  message={errors.email.message as string}
+                />
+              </View>
             )}
           </View>
         )}
@@ -73,28 +81,38 @@ export const AuthForm: React.FC<AuthFormProps> = ({
         control={control}
         name="password"
         render={({ field: { value, onChange } }) => (
-          <View style={{ gap: theme.spacing.xs }}>
-            <Input
-              placeholder="Password"
-              secureTextEntry={!showPassword}
-              value={value}
-              onChangeText={onChange}
-              containerStyle={{ position: "relative" }}
-            />
-            <Icon
-              name={showPassword ? "eye-off" : "eye"}
-              onPress={togglePassword}
-              size={20}
-              style={{
-                position: "absolute",
-                right: theme.spacing.md,
-                top: theme.spacing.sm,
-              }}
-            />
+          <View>
+            <View style={{ position: "relative" }}>
+              <Input
+                variant="default"
+                placeholder="Password"
+                secureTextEntry={!showPassword}
+                value={value || ""}
+                onChangeText={onChange}
+              />
+              <Pressable
+                onPress={togglePassword}
+                style={{
+                  position: "absolute",
+                  right: 12,
+                  top: 12,
+                  padding: 4,
+                }}
+              >
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={20}
+                  color={theme.colors.onSurfaceVariant}
+                />
+              </Pressable>
+            </View>
             {errors.password && (
-              <Text variant="label" color="error">
-                {errors.password.message as string}
-              </Text>
+              <View style={{ marginTop: 4 }}>
+                <Error
+                  variant="text"
+                  message={errors.password.message as string}
+                />
+              </View>
             )}
           </View>
         )}
@@ -106,44 +124,60 @@ export const AuthForm: React.FC<AuthFormProps> = ({
           control={control}
           name="confirmPassword"
           render={({ field: { value, onChange } }) => (
-            <View style={{ gap: theme.spacing.xs }}>
-              <Input
-                placeholder="Confirm Password"
-                secureTextEntry={!showConfirm}
-                value={value}
-                onChangeText={onChange}
-                containerStyle={{ position: "relative" }}
-              />
-              <Icon
-                name={showConfirm ? "eye-off" : "eye"}
-                onPress={toggleConfirm}
-                size={20}
-                style={{
-                  position: "absolute",
-                  right: theme.spacing.md,
-                  top: theme.spacing.sm,
-                }}
-              />
+            <View>
+              <View style={{ position: "relative" }}>
+                <Input
+                  variant="default"
+                  placeholder="Confirm Password"
+                  secureTextEntry={!showConfirm}
+                  value={value || ""}
+                  onChangeText={onChange}
+                />
+                <Pressable
+                  onPress={toggleConfirm}
+                  style={{
+                    position: "absolute",
+                    right: 12,
+                    top: 12,
+                    padding: 4,
+                  }}
+                >
+                  <MaterialIcons
+                    name={showConfirm ? "visibility-off" : "visibility"}
+                    size={20}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                </Pressable>
+              </View>
               {errors.confirmPassword && (
-                <Text variant="label" color="error">
-                  {errors.confirmPassword.message as string}
-                </Text>
+                <View style={{ marginTop: 4 }}>
+                  <Error
+                    variant="text"
+                    message={errors.confirmPassword.message as string}
+                  />
+                </View>
               )}
             </View>
           )}
         />
       )}
 
+      {/* Error Display */}
+      {error && (
+        <Error variant="box" message={error.message || "An error occurred"} />
+      )}
+
       {/* Submit Button */}
       <Button
-        title={
-          isLoading ? "Loading..." : mode === "signIn" ? "Sign In" : "Sign Up"
-        }
+        variant="primary"
+        size="lg"
         onPress={handleSubmit(handleSubmitForm)}
         disabled={isLoading}
-        size="lg"
-        elevation="level1"
-      />
+        loading={isLoading}
+        fullWidth
+      >
+        {mode === "signIn" ? "Sign In" : "Sign Up"}
+      </Button>
     </View>
   );
 };

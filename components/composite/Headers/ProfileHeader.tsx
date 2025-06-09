@@ -1,6 +1,5 @@
 import React from "react";
 import { View, ToggleText, Avatar } from "@/components/ui";
-import { useTheme } from "@/hooks/useTheme";
 
 interface ProfileHeaderProps {
   avatarUri?: string;
@@ -13,39 +12,37 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   activeTab,
   onTabChange,
 }) => {
-  const { theme } = useTheme();
-
   return (
-    <View
-      backgroundColor="surfaceContainer"
-      padding="xl"
-      style={{ alignItems: "center" }}
-    >
-      <View
-        style={{
-          marginBottom: theme.spacing.lg,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+    <View variant="centered" backgroundColor="surfaceVariant" padding="xl">
+      <View style={{ marginBottom: 24 }}>
         <Avatar
+          variant="lg"
           source={
             avatarUri
               ? { uri: avatarUri }
               : require("../../../assets/default-avatar.png")
           }
-          label="U"
-          size="xl"
-          backgroundColor="primary"
-          textColor="onPrimary"
+          initials="U"
         />
       </View>
 
-      <ToggleText
-        options={["created", "favorited"]}
-        selected={activeTab}
-        onChange={(val) => onTabChange(val as "created" | "favorited")}
-      />
+      <View variant="row" style={{ gap: 8 }}>
+        <ToggleText
+          variant="pill"
+          active={activeTab === "created"}
+          onPress={() => onTabChange("created")}
+        >
+          Created
+        </ToggleText>
+
+        <ToggleText
+          variant="pill"
+          active={activeTab === "favorited"}
+          onPress={() => onTabChange("favorited")}
+        >
+          Favorited
+        </ToggleText>
+      </View>
     </View>
   );
 };

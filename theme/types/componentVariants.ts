@@ -21,7 +21,13 @@ export type ScrollVariant = "padded" | "flush" | "fullScreen";
 
 export type AvatarVariant = "sm" | "md" | "lg";
 export type BadgeVariant = "primary" | "success" | "warning" | "danger";
-export type ButtonVariant = "primary" | "secondary" | "danger";
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "danger"
+  | "outline"
+  | "link"
+  | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";
 export type CardVariant = "filled" | "outlined" | "elevated";
 export type CheckboxVariant = "default" | "sm" | "lg";
@@ -32,7 +38,22 @@ export type InputVariant = "default" | "sm" | "lg";
 export type ListItemVariant = "default" | "inset";
 export type LoadingVariant = "spinner" | "overlay";
 export type ModalVariant = "default" | "fullscreen";
-export type TextVariant = "heading" | "body" | "caption";
+export type TextVariant =
+  | "bodyXSmallRegular"
+  | "bodyXSmallBold"
+  | "bodySmallRegular"
+  | "bodySmallMedium"
+  | "bodySmallBold"
+  | "bodyNormalRegular"
+  | "bodyNormalMedium"
+  | "bodyNormalBold"
+  | "bodyLargeRegular"
+  | "bodyLargeMedium"
+  | "bodyXLargeRegular"
+  | "bodyXLargeBold"
+  | "headerOne"
+  | "headerTwo"
+  | "headerThree";
 export type ToggleTextVariant = "pill" | "underline";
 
 export interface ComponentVariants {

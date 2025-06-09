@@ -1,6 +1,6 @@
+import React from "react";
 import { View, Text } from "@/components/ui";
 import { FavoriteButton, RatingDisplay } from "@/components/composite";
-import { useTheme } from "@/hooks/useTheme";
 
 export interface ItemHeaderProps {
   id: string;
@@ -15,19 +15,25 @@ export const ItemHeader: React.FC<ItemHeaderProps> = ({
   category,
   rating,
 }) => {
-  const { theme } = useTheme();
-
   return (
-    <View padding="lg" style={{ gap: theme.spacing.md }}>
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Text variant="headline" numberOfLines={1} style={{ flex: 1 }}>
+    <View padding="lg" style={{ gap: 16 }}>
+      <View variant="row" style={{ alignItems: "center" }}>
+        <Text
+          variant="headerThree"
+          numberOfLines={1}
+          style={{
+            flex: 1,
+            marginRight: 8, // space for favorite button
+          }}
+        >
           {title}
         </Text>
         <FavoriteButton itemId={id} />
       </View>
 
       <RatingDisplay value={rating} displayType="full" size={20} />
-      <Text variant="label" color="onSurfaceVariant">
+
+      <Text variant="bodySmallRegular" color="onSurfaceVariant">
         {category}
       </Text>
     </View>

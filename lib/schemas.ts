@@ -19,6 +19,10 @@ export const signUpSchema = signInSchema
 export type SignInSchema = z.infer<typeof signInSchema>;
 export type SignUpSchema = z.infer<typeof signUpSchema>;
 
+export const ingredientSchema = z.object({
+  value: z.string().min(1, "Ingredient cannot be empty"),
+});
+
 export const instructionSchema = z.object({
   "image-url": z.string(),
   content: z.string().min(1, "Instruction content is required"),
@@ -30,7 +34,7 @@ export const itemFormSchema = z.object({
   main_image: z.string().min(1, "Main image is required"),
   category_id: z.number().nullable(),
   ingredients: z
-    .array(z.string().min(1, "Ingredient cannot be empty"))
+    .array(ingredientSchema)
     .min(2, "At least two ingredients are required")
     .max(20, "Maximum 20 ingredients allowed"),
   instructions: z

@@ -1,9 +1,10 @@
 import React from "react";
-import { useTheme } from "@/hooks/useTheme";
-import { Icon, Text, View } from "@/components/ui";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useTheme } from "@/theme/hooks/useTheme";
+import { Text, View } from "@/components/ui";
+import { ColorKey } from "@/theme/types/keys";
 
 type DisplayType = "full" | "compact";
-type ColorKey = keyof ReturnType<typeof useTheme>["theme"]["colors"];
 
 interface RatingDisplayProps {
   value: number;
@@ -21,32 +22,36 @@ export const RatingDisplay: React.FC<RatingDisplayProps> = ({
   color = "primary",
 }) => {
   const { theme } = useTheme();
-  const filledStars = Math.round(value); // ✅ Fill based on whole number
+  const filledStars = Math.round(value);
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View variant="row" style={{ alignItems: "center" }}>
       {displayType === "full" &&
         Array.from({ length: maxStars }, (_, index) => {
           const filled = index < filledStars;
           return (
-            <Icon
+            <MaterialIcons
               key={index}
-              name="star"
+              name={filled ? "star" : "star-border"}
               size={size}
-              color={filled ? color : "onSurfaceVariant"}
+              color={
+                filled ? theme.colors[color] : theme.colors.onSurfaceVariant
+              }
               style={{ marginRight: 2 }}
             />
           );
         })}
+
       {displayType === "compact" && (
-        <Icon
+        <MaterialIcons
           name="star"
-          color={color}
+          color={theme.colors[color]}
           size={size}
           style={{ marginRight: 4 }}
         />
       )}
-      <Text variant="label" color="onSurface">
+
+      <Text variant="bodySmallMedium" color="onSurface">
         {value.toFixed(1)}
       </Text>
     </View>

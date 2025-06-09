@@ -1,17 +1,16 @@
-// Need to rewrite so that api hook logic is separated from the component logic. i.e. do it in screen.
-// Need to go over ingrendient and instruction field array declarations.
 import React from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { itemFormSchema } from "@/lib/schemas";
 import { ItemFormData } from "@/types/item";
 import { useAddItem } from "@/hooks/useAddItem";
-import { useTheme } from "@/hooks/useTheme";
-import { View, Text, Scroll, Button } from "@/components/ui";
+import { View, Text, Scroll, Button, Error } from "@/components/ui";
 import {
   ItemFormField,
   ImageUploadField,
   CategorySelect,
+  DynamicList,
+  InstructionFormField,
 } from "@/components/composite";
 
 interface AddItemFormProps {
@@ -23,8 +22,6 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
   userId,
   onSuccess,
 }) => {
-  const { theme } = useTheme();
-
   const { control, handleSubmit, setValue, watch, reset } =
     useForm<ItemFormData>({
       resolver: zodResolver(itemFormSchema),
@@ -39,12 +36,12 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
     });
 
   const ingredientsArray = useFieldArray({
-    control: control as any,
+    control,
     name: "ingredients",
   });
 
   const instructionsArray = useFieldArray({
-    control: control as any,
+    control,
     name: "instructions",
   });
 
@@ -57,13 +54,13 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
         onSuccess(item);
       },
       onError: (error) => {
-        alert(error instanceof Error ? error.message : "An error occurred");
+        console.error("Add item error:", error);
       },
     });
   };
 
   return (
-    <Scroll padding="lg">
+    <Scroll variant="padded">
       <ItemFormField
         control={control}
         name="title"
@@ -87,113 +84,58 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
 
       <CategorySelect control={control} />
 
-      <View margin="lg">
-        <Text variant="title" fontWeight="bold" style={{ marginBottom: 12 }}>
-          Ingredients
-        </Text>
-        {ingredientsArray.fields.map((field, index) => (
-          <View
-            key={field.id}
-            style={{ flexDirection: "row", marginBottom: 12 }}
-          >
-            <View style={{ flex: 1, marginRight: 8 }}>
-              <ItemFormField
-                control={control}
-                name={`ingredients.${index}` as const}
-                label=""
-                placeholder="Enter ingredient"
-              />
-            </View>
-            <Button
-              title="Remove"
-              color="primary"
-              variant="text"
-              size="sm"
-              onPress={() => ingredientsArray.remove(index)}
-            />
-          </View>
-        ))}
-        <View style={{ alignItems: "flex-start", marginTop: theme.spacing.sm }}>
-          <Button
-            title="Add Ingredient"
-            onPress={() => ingredientsArray.append("")}
-            size="md"
-            variant="outlined"
-            color="primary"
-          />
-        </View>
-      </View>
+      <DynamicList
+        control={control}
+        name="ingredients"
+        label="Ingredients"
+        fields={ingredientsArray.fields}
+        append={() => ingredientsArray.append({ value: "" })}
+        remove={ingredientsArray.remove}
+        max={20}
+        placeholder="Enter ingredient"
+      />
 
-      <View margin="lg">
-        <Text variant="title" fontWeight="bold" style={{ marginBottom: 12 }}>
-          Instructions
-        </Text>
-        {instructionsArray.fields.map((field, index) => (
-          <View
-            key={field.id}
-            backgroundColor="surfaceContainerLowest"
-            padding="md"
-            borderRadius="md"
-            style={{ marginBottom: 16 }}
-          >
-            <Text
-              variant="label"
-              fontWeight="medium"
-              style={{ marginBottom: 8 }}
-            >
-              Step {index + 1}
-            </Text>
-            <ItemFormField
-              control={control}
-              name={`instructions.${index}.content` as const}
-              label=""
-              placeholder="Enter instruction"
-              multiline
-            />
-            <ImageUploadField
-              label="Step Image (Optional)"
-              value={watch(`instructions.${index}.image-url` as const)}
-              onChange={(url) =>
-                setValue(`instructions.${index}.image-url` as const, url)
-              }
-            />
-            <View
-              style={{ alignItems: "flex-end", marginTop: theme.spacing.sm }}
-            >
-              <Button
-                title="Remove Step"
-                onPress={() => instructionsArray.remove(index)}
-                size="sm"
-                variant="outlined"
-                color="secondary"
-              />
-            </View>
-          </View>
-        ))}
-        <View style={{ alignItems: "flex-start", marginTop: theme.spacing.sm }}>
-          <Button
-            title="Add Step"
-            onPress={() =>
-              instructionsArray.append({ content: "", "image-url": "" })
-            }
-            size="md"
-            variant="outlined"
-            color="primary"
-          />
-        </View>
-      </View>
+      <DynamicList
+        control={control}
+        name="instructions"
+        label="Instructions"
+        fields={instructionsArray.fields}
+        append={() =>
+          instructionsArray.append({ content: "", "image-url": "" })
+        }
+        remove={instructionsArray.remove}
+        max={15}
+        customFieldComponent={InstructionFormField}
+        customFieldProps={{
+          setValue,
+          watch,
+        }}
+      />
 
-      <View
-        style={{ marginTop: theme.spacing.lg, marginBottom: theme.spacing.xxl }}
-      >
+      <View style={{ marginTop: 24, marginBottom: 48 }}>
         <Button
-          title={addItemMutation.isPending ? "Adding..." : "Add Recipe"}
+          variant="primary"
+          size="lg"
           onPress={handleSubmit(onSubmit)}
           disabled={addItemMutation.isPending}
-          size="lg"
-          color="tertiary"
-          elevation="level2"
-        />
+          loading={addItemMutation.isPending}
+          fullWidth
+        >
+          Add Recipe
+        </Button>
+
+        {addItemMutation.error && (
+          <View style={{ marginTop: 8 }}>
+            <Error
+              variant="box"
+              message={
+                addItemMutation.error instanceof Error
+                  ? addItemMutation.error.message
+                  : "An error occurred"
+              }
+            />
+          </View>
+        )}
       </View>
     </Scroll>
   );

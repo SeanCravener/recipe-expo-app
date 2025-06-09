@@ -1,10 +1,8 @@
 import React from "react";
-import { Pressable } from "react-native";
 import { Controller, Control } from "react-hook-form";
-import { useTheme } from "@/hooks/useTheme";
 import { useCategories } from "@/hooks/useCategories";
 import { ItemFormData } from "@/types/item";
-import { View, Text } from "@/components/ui";
+import { View, Text, ToggleText, Loading } from "@/components/ui";
 
 interface CategorySelectProps {
   control: Control<ItemFormData>;
@@ -12,9 +10,12 @@ interface CategorySelectProps {
 
 export const CategorySelect: React.FC<CategorySelectProps> = ({ control }) => {
   const { data: categories, isLoading } = useCategories();
-  const { theme } = useTheme();
 
-  if (isLoading || !categories) return null;
+  if (isLoading) {
+    return <Loading variant="spinner" />;
+  }
+
+  if (!categories) return null;
 
   return (
     <Controller
@@ -23,9 +24,8 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({ control }) => {
       render={({ field: { value, onChange } }) => (
         <View margin="md">
           <Text
-            variant="title"
-            fontWeight="bold"
-            style={{ marginBottom: theme.spacing.sm }}
+            variant="bodyNormalBold"
+            style={{ marginBottom: 8 }} // small fixed spacing
           >
             Category
           </Text>
@@ -33,32 +33,20 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({ control }) => {
             style={{
               flexDirection: "row",
               flexWrap: "wrap",
-              gap: theme.spacing.sm,
+              gap: 8, // consistent small gap
             }}
           >
             {categories.map((category) => {
               const selected = value === category.id;
               return (
-                <Pressable
+                <ToggleText
                   key={category.id}
+                  variant="pill"
+                  active={selected}
                   onPress={() => onChange(category.id)}
-                  style={{
-                    paddingHorizontal: theme.spacing.md,
-                    paddingVertical: theme.spacing.xs,
-                    borderRadius: theme.borderRadius.lg,
-                    backgroundColor: selected
-                      ? theme.colors.primary
-                      : theme.colors.surfaceVariant,
-                  }}
                 >
-                  <Text
-                    variant="label"
-                    color={selected ? "onPrimary" : "onSurfaceVariant"}
-                    fontWeight={selected ? "bold" : "regular"}
-                  >
-                    {category.category}
-                  </Text>
-                </Pressable>
+                  {category.category}
+                </ToggleText>
               );
             })}
           </View>

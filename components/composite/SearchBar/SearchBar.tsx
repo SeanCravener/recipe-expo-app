@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, Keyboard, StyleProp, ViewStyle } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
-import { Input, View } from "@/components/ui";
+import { useTheme } from "@/theme/hooks/useTheme";
+import { Input, View, Button } from "@/components/ui";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface SearchBarProps {
@@ -26,60 +26,70 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   const setValue = onChangeText ?? setLocalValue;
 
   const handleSubmit = () => {
-    onSearch(localValue.trim());
+    onSearch(searchValue.trim());
+    Keyboard.dismiss();
   };
 
   const handleClear = () => {
     setValue("");
-    onSearch?.("");
+    onSearch("");
     Keyboard.dismiss();
   };
 
   return (
-    <View
-      backgroundColor="background"
-      style={[{ padding: theme.spacing.sm }, style]}
-    >
+    <View backgroundColor="background" padding="sm" style={style}>
       <View
-        backgroundColor="primary"
-        padding="sm"
+        backgroundColor="surfaceVariant"
         borderRadius="md"
-        margin="md"
-        style={[
-          {
-            flexDirection: "row",
-            alignItems: "center",
-          },
-          style,
-        ]}
+        padding="sm"
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 8,
+        }}
       >
         <MaterialIcons
           name="search"
-          size={24}
-          color={theme.colors.onPrimary}
-          style={{ marginRight: theme.spacing.sm }}
+          size={20}
+          color={theme.colors.onSurfaceVariant}
         />
+
         <Input
+          variant="default"
           placeholder={placeholder}
           value={searchValue}
           onChangeText={setValue}
           onSubmitEditing={handleSubmit}
-          // variant="filled"
-          containerStyle={{ flex: 1 }}
-          clearButtonMode="while-editing"
+          containerStyle={{
+            flex: 1,
+            borderWidth: 0, // remove border since we're in a container
+            backgroundColor: "transparent",
+          }}
+          fieldStyle={{
+            fontSize: 16,
+          }}
           returnKeyType="search"
+          autoCapitalize="none"
+          autoCorrect={false}
         />
+
         {searchValue.length > 0 && (
-          <Pressable
+          <Button
+            variant="ghost"
+            size="sm"
             onPress={handleClear}
-            style={{ padding: theme.spacing.sm }}
+            style={{
+              minWidth: 32,
+              minHeight: 32,
+              padding: 4,
+            }}
           >
             <MaterialIcons
               name="clear"
-              size={20}
-              color={theme.colors.onPrimary}
+              size={18}
+              color={theme.colors.onSurfaceVariant}
             />
-          </Pressable>
+          </Button>
         )}
       </View>
     </View>

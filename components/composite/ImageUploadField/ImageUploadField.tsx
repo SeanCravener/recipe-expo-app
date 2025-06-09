@@ -1,9 +1,9 @@
-import React from "react";
-import { Image, Pressable } from "react-native";
+import React, { useState } from "react";
+import { Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/theme/hooks/useTheme";
 import { useImageUpload } from "@/hooks/useImageUpload";
-import { View, Text } from "@/components/ui";
+import { View, Text, Image, Card, Loading, Error } from "@/components/ui";
 
 interface ImageUploadFieldProps {
   value?: string;
@@ -20,9 +20,11 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
 }) => {
   const { theme } = useTheme();
   const { pickImage, uploadImage, isUploading } = useImageUpload();
+  const [error, setError] = useState<string | null>(null);
 
   const handleUpload = async () => {
     try {
+      setError(null);
       const image = await pickImage();
       if (image) {
         const url = await uploadImage(image.uri, bucket, value);
@@ -30,59 +32,69 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
       }
     } catch (error) {
       console.error("Error uploading image:", error);
+      setError("Failed to upload image. Please try again.");
     }
   };
 
   return (
     <View margin="md">
-      <Text
-        variant="label"
-        fontWeight="bold"
-        style={{ marginBottom: theme.spacing.sm }}
-      >
+      <Text variant="bodyNormalBold" style={{ marginBottom: 8 }}>
         {label}
       </Text>
+
       <Pressable
         onPress={handleUpload}
         disabled={isUploading}
-        style={{
-          height: 200,
-          borderWidth: 1,
-          borderColor: theme.colors.outlineVariant,
-          borderRadius: theme.borderRadius.md,
-          overflow: "hidden",
-        }}
+        style={{ opacity: isUploading ? 0.7 : 1 }}
       >
-        {value ? (
-          <Image
-            source={{ uri: value }}
-            style={{ width: "100%", height: "100%" }}
-            resizeMode="cover"
-          />
-        ) : (
-          <View
-            backgroundColor="surfaceContainerLowest"
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <MaterialIcons
-              name="add-photo-alternate"
-              size={32}
-              color={theme.colors.onSurfaceVariant}
+        <Card
+          variant="outlined"
+          style={{
+            height: 200,
+            padding: 0,
+            overflow: "hidden",
+          }}
+        >
+          {value ? (
+            <Image
+              source={{ uri: value }}
+              variant="cover"
+              style={{ width: "100%", height: "100%" }}
             />
-            <Text
-              variant="label"
-              color="onSurfaceVariant"
-              style={{ marginTop: theme.spacing.xs }}
+          ) : (
+            <View
+              variant="centered"
+              backgroundColor="surfaceVariant"
+              style={{ flex: 1 }}
             >
-              {isUploading ? "Uploading..." : "Upload Image"}
-            </Text>
-          </View>
-        )}
+              {isUploading ? (
+                <Loading variant="spinner" />
+              ) : (
+                <>
+                  <MaterialIcons
+                    name="add-photo-alternate"
+                    size={32}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                  <Text
+                    variant="bodySmallMedium"
+                    color="onSurfaceVariant"
+                    style={{ marginTop: 8 }}
+                  >
+                    Upload Image
+                  </Text>
+                </>
+              )}
+            </View>
+          )}
+        </Card>
       </Pressable>
+
+      {error && (
+        <View style={{ marginTop: 8 }}>
+          <Error variant="text" message={error} />
+        </View>
+      )}
     </View>
   );
 };

@@ -13,14 +13,14 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({
   avatarSrc,
 }) => {
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View variant="row" margin="md">
       <Avatar
-        label={avatarLabel}
+        variant="md"
+        initials={avatarLabel}
         source={avatarSrc}
-        size={"md"}
-        style={{ marginRight: 8 }}
+        style={{ marginRight: 8 }} // keeping this since you don't have marginRight token override
       />
-      <Text variant="label" color="onSurfaceVariant">
+      <Text variant="bodyNormalMedium" color="onSurfaceVariant">
         {username}
       </Text>
     </View>

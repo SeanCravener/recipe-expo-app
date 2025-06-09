@@ -2,9 +2,13 @@ import { Database } from "./supabase";
 
 type DbItem = Database["public"]["Tables"]["items"]["Row"];
 
+export interface Ingredient {
+  value: string;
+}
+
 export interface Instruction {
-  "image-url": string;
   content: string;
+  "image-url": string;
 }
 
 export interface Item extends Omit<DbItem, "instructions"> {
@@ -26,6 +30,6 @@ export type ItemFormData = {
   description: string;
   main_image: string;
   category_id: number | null;
-  ingredients: string[];
+  ingredients: Ingredient[];
   instructions: Instruction[];
 };

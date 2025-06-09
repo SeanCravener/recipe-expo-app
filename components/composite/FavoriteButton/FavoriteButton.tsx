@@ -1,6 +1,5 @@
 import React from "react";
-import { Pressable } from "react-native";
-import { Image } from "@/components/ui";
+import { Image, Button } from "@/components/ui";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface FavoriteButtonProps {
@@ -28,11 +27,16 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   };
 
   return (
-    <Pressable
+    <Button
+      variant="ghost"
+      size="sm"
       onPress={handlePress}
-      style={{ padding: 5, justifyContent: "center", alignItems: "center" }}
       disabled={isLoading}
-      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      style={{
+        padding: 5,
+        minWidth: size + 10, // accommodate the image plus padding
+        minHeight: size + 10,
+      }}
     >
       <Image
         source={
@@ -40,9 +44,9 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
             ? require("../../../assets/heart-filled.png")
             : require("../../../assets/heart-unfilled.png")
         }
-        style={[{ width: size, height: size }]}
-        resizeMode="contain"
+        variant="contain"
+        style={{ width: size, height: size }}
       />
-    </Pressable>
+    </Button>
   );
 };

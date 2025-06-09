@@ -1,6 +1,6 @@
 import React from "react";
-import { View as RNView, StyleSheet } from "react-native"; // Need to double check use of View instead of custom View.
-import { useTheme } from "@/hooks/useTheme";
+import { View as RNView } from "react-native";
+import { useTheme } from "@/theme/hooks/useTheme";
 import { Text, View } from "@/components/ui";
 
 interface StepProgressBarProps {
@@ -18,41 +18,34 @@ export const StepProgressBar: React.FC<StepProgressBarProps> = ({
   return (
     <View>
       <View
+        variant="row"
         style={{
-          flexDirection: "row",
           justifyContent: "flex-end",
-          marginBottom: theme.spacing.xs,
+          marginBottom: 4,
         }}
       >
-        <Text variant="label" color="onSurface">
+        <Text variant="bodySmallRegular" color="onSurfaceVariant">
           Step {currentStep} of {totalSteps}
         </Text>
       </View>
 
-      <RNView style={styles.container}>
+      <View
+        style={{
+          height: 8,
+          backgroundColor: theme.colors.surfaceVariant,
+          borderRadius: theme.borderRadius.full,
+          overflow: "hidden",
+        }}
+      >
         <RNView
-          style={[
-            styles.bar,
-            {
-              width: `${progress * 100}%`,
-              backgroundColor: theme.colors.primary,
-              borderRadius: theme.borderRadius.round,
-            },
-          ]}
+          style={{
+            height: "100%",
+            width: `${progress * 100}%`,
+            backgroundColor: theme.colors.primary,
+            borderRadius: theme.borderRadius.full,
+          }}
         />
-      </RNView>
+      </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    height: 8,
-    backgroundColor: "#e6f0f1",
-    borderRadius: 100,
-    overflow: "hidden",
-  },
-  bar: {
-    height: "100%",
-  },
-});

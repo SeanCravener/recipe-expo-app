@@ -1,50 +1,34 @@
 import React from "react";
-import { useTheme } from "@/hooks/useTheme";
 import { View, Text } from "@/components/ui";
+import { Ingredient } from "@/types/item";
 
 interface IngredientsListProps {
-  ingredients: string[];
+  ingredients: Ingredient[];
 }
 
 export const IngredientsList: React.FC<IngredientsListProps> = ({
   ingredients,
 }) => {
-  const { theme } = useTheme();
-
   return (
     <View padding="md">
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: theme.spacing.md,
-        }}
-      >
-        <Text variant="title" fontWeight="bold">
-          Ingredients
-        </Text>
+      <View variant="row" style={{ marginBottom: 16 }}>
+        <Text variant="bodyNormalBold">Ingredients</Text>
         <Text
-          variant="label"
+          variant="bodySmallRegular"
           color="onSurfaceVariant"
-          style={{ marginLeft: theme.spacing.xs }}
+          style={{ marginLeft: 4 }}
         >
           ({ingredients.length})
         </Text>
       </View>
 
-      {ingredients.map((ingredient, index) => (
-        <Text
-          key={index}
-          variant="body"
-          color="onSurface"
-          style={{
-            marginBottom: theme.spacing.sm,
-            lineHeight: theme.typography.lineHeight.relaxed,
-          }}
-        >
-          • {ingredient}
-        </Text>
-      ))}
+      <View style={{ gap: 8 }}>
+        {ingredients.map((ingredient, index) => (
+          <Text key={index} variant="bodyNormalRegular" color="onSurface">
+            • {ingredient.value}
+          </Text>
+        ))}
+      </View>
     </View>
   );
 };

@@ -1,11 +1,12 @@
 import React, { useRef, useEffect } from "react";
 import { Animated, Pressable, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
-import { View, Text } from "@/components/ui";
+import { useTheme } from "@/theme/hooks/useTheme";
+import { View, Text, Button } from "@/components/ui";
+import { Ingredient } from "@/types/item";
 
 interface IngredientsDrawerProps {
-  ingredients: string[];
+  ingredients: Ingredient[];
   isOpen: boolean;
   onClose: () => void;
 }
@@ -26,22 +27,24 @@ export const IngredientsDrawer: React.FC<IngredientsDrawerProps> = ({
     }).start();
   }, [isOpen]);
 
+  if (!isOpen) return null;
+
   return (
     <>
-      {isOpen && (
-        <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject}>
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: theme.colors.background + "88",
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-            }}
-          />
-        </Pressable>
-      )}
+      {/* Backdrop */}
+      <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject}>
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: theme.colors.backdrop,
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+          }}
+        />
+      </Pressable>
 
+      {/* Drawer */}
       <Animated.View
         style={{
           position: "absolute",
@@ -51,49 +54,47 @@ export const IngredientsDrawer: React.FC<IngredientsDrawerProps> = ({
           width: 300,
           backgroundColor: theme.colors.surface,
           transform: [{ translateX: slideAnim }],
-          shadowColor: "#000",
-          shadowOffset: { width: -2, height: 0 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          elevation: 5,
+          ...theme.elevation.level4,
         }}
       >
+        {/* Header */}
         <View
+          variant="row"
           padding="md"
           style={{
-            flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
             borderBottomWidth: 1,
-            borderBottomColor: theme.colors.outlineVariant,
+            borderBottomColor: theme.colors.outline,
           }}
         >
-          <Text variant="title" fontWeight="bold">
-            Ingredients
+          <Text variant="bodyNormalBold">
+            Ingredients ({ingredients.length})
           </Text>
-          <Pressable onPress={onClose} style={{ padding: theme.spacing.xs }}>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onPress={onClose}
+            style={{ minWidth: 40, minHeight: 40 }}
+          >
             <MaterialIcons
               name="close"
               size={24}
               color={theme.colors.onSurfaceVariant}
             />
-          </Pressable>
+          </Button>
         </View>
 
+        {/* Content */}
         <View padding="md" style={{ flex: 1 }}>
-          {ingredients.map((ingredient, index) => (
-            <Text
-              key={index}
-              variant="body"
-              color="onSurface"
-              style={{
-                marginBottom: theme.spacing.sm,
-                lineHeight: theme.typography.lineHeight.loose,
-              }}
-            >
-              • {ingredient}
-            </Text>
-          ))}
+          <View style={{ gap: 8 }}>
+            {ingredients.map((ingredient, index) => (
+              <Text key={index} variant="bodyNormalRegular" color="onSurface">
+                • {ingredient.value}
+              </Text>
+            ))}
+          </View>
         </View>
       </Animated.View>
     </>

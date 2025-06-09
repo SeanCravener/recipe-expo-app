@@ -24,11 +24,15 @@ export const ItemList = ({
   ListHeaderComponent,
   emptyText = "No items found",
 }: ItemListProps) => {
+  const handleItemPress = useCallback((itemId: string) => {
+    router.push(`/items/${itemId}`);
+  }, []);
+
   const renderItem = useCallback(
     ({ item }: { item: ItemSummary }) => (
       <ItemCard item={item} onPress={() => handleItemPress(item.id)} />
     ),
-    []
+    [handleItemPress]
   );
 
   const loadMore = useCallback(() => {
@@ -39,15 +43,34 @@ export const ItemList = ({
 
   const renderFooter = useCallback(() => {
     if (!isFetchingNextPage) return null;
-    return <Loading size="small" />;
+    return (
+      <View style={{ padding: 16 }}>
+        <Loading variant="spinner" />
+      </View>
+    );
   }, [isFetchingNextPage]);
 
-  const handleItemPress = (itemId: string) => {
-    router.push(`/items/${itemId}`);
-  };
+  const renderEmptyComponent = useCallback(
+    () => (
+      <View variant="centered" padding="lg" style={{ flex: 1, minHeight: 200 }}>
+        <Text
+          variant="bodyNormalRegular"
+          color="onSurfaceVariant"
+          style={{ textAlign: "center" }}
+        >
+          {emptyText}
+        </Text>
+      </View>
+    ),
+    [emptyText]
+  );
 
   if (isLoading) {
-    return <Loading size="small" />;
+    return (
+      <View variant="centered" style={{ flex: 1 }}>
+        <Loading variant="spinner" />
+      </View>
+    );
   }
 
   return (
@@ -60,15 +83,9 @@ export const ItemList = ({
       onEndReached={loadMore}
       onEndReachedThreshold={0.5}
       ListFooterComponent={renderFooter}
-      ListEmptyComponent={
-        <View
-          padding="md"
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text variant="md" align="center">
-            {emptyText}
-          </Text>
-        </View>
+      ListEmptyComponent={renderEmptyComponent}
+      contentContainerStyle={
+        !data || data.length === 0 ? { flex: 1 } : undefined
       }
     />
   );
