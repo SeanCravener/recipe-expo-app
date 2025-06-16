@@ -10,7 +10,6 @@ import {
 
 import { useTheme } from "@/theme/hooks/useTheme";
 import { ButtonVariant, ButtonSize } from "@/theme/types/componentVariants";
-
 import { Text } from "@/components/ui";
 
 export interface ButtonProps
@@ -19,6 +18,9 @@ export interface ButtonProps
   size?: ButtonSize;
   fullWidth?: boolean;
   loading?: boolean;
+
+  /** Reduces padding for icon-only buttons */
+  compact?: boolean;
 
   /** Optional overrides */
   containerStyle?: StyleProp<ViewStyle>;
@@ -31,6 +33,7 @@ export interface ButtonProps
   style?:
     | StyleProp<ViewStyle>
     | ((state: PressableStateCallbackType) => StyleProp<ViewStyle>);
+
   children: React.ReactNode;
 }
 
@@ -39,7 +42,8 @@ export const Button: React.FC<ButtonProps> = ({
   size = "md",
   fullWidth = false,
   loading = false,
-  disabled,
+  disabled = false,
+  compact = false,
   children,
   containerStyle,
   labelStyle,
@@ -49,33 +53,72 @@ export const Button: React.FC<ButtonProps> = ({
   const { theme } = useTheme();
   const { container, label } = theme.components.button[variant][size];
 
-  const fullWidthStyle: ViewStyle | undefined = fullWidth
-    ? { alignSelf: "stretch", width: "100%" }
-    : undefined;
+  const enhancedStyles: ViewStyle = {
+    ...container,
+    ...(fullWidth && {
+      alignSelf: "stretch",
+      width: "100%",
+    }),
+    ...(disabled && {
+      opacity: 0.5,
+    }),
+    ...(compact && {
+      paddingVertical: Math.max(
+        typeof container.paddingVertical === "number"
+          ? container.paddingVertical * 0.5
+          : 8,
+        4
+      ),
+      paddingHorizontal: Math.max(
+        typeof container.paddingHorizontal === "number"
+          ? container.paddingHorizontal * 0.5
+          : 8,
+        4
+      ),
+    }),
+  };
 
-  const disabledStyle: ViewStyle | undefined = disabled
-    ? { opacity: 0.5 }
-    : undefined;
+  // Combine all styles efficiently
+  const finalStyle = React.useMemo(() => {
+    const baseStyles: StyleProp<ViewStyle> = [enhancedStyles, containerStyle];
 
-  /** base array used for both object and callback forms */
-  const baseArray: StyleProp<ViewStyle> = [
-    container,
-    fullWidthStyle,
-    disabledStyle,
-    containerStyle,
-  ];
+    if (typeof style === "function") {
+      return (state: PressableStateCallbackType) => [
+        ...baseStyles,
+        style(state),
+      ];
+    }
 
-  const pressableStyle =
-    typeof style === "function"
-      ? (state: PressableStateCallbackType) => [...baseArray, style(state)]
-      : [...baseArray, style];
+    return [...baseStyles, style];
+  }, [enhancedStyles, containerStyle, style]);
+
+  // Memoized loading indicator color
+  const loadingColor = React.useMemo(() => {
+    return typeof label.color === "string"
+      ? label.color
+      : theme.colors.onPrimary;
+  }, [label.color, theme.colors.onPrimary]);
 
   return (
-    <Pressable disabled={disabled || loading} style={pressableStyle} {...rest}>
+    <Pressable
+      disabled={disabled || loading}
+      style={finalStyle}
+      accessibilityRole="button"
+      accessibilityState={{
+        disabled: disabled || loading,
+        busy: loading,
+      }}
+      {...rest}
+    >
       {loading ? (
-        <ActivityIndicator color={label.color as string} />
-      ) : (
+        <ActivityIndicator
+          color={loadingColor}
+          size={size === "sm" ? "small" : "small"} // Keep consistent small size
+        />
+      ) : typeof children === "string" ? (
         <Text style={[label, labelStyle]}>{children}</Text>
+      ) : (
+        children
       )}
     </Pressable>
   );

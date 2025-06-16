@@ -1,52 +1,42 @@
 import React from "react";
-import { Image, Button } from "@/components/ui";
+import { IconButton } from "@/components/ui";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface FavoriteButtonProps {
-  itemId: string; // unique identifier for the item
-  isFavorited?: boolean;
-  size?: number;
+  itemId: string;
+  size?: "sm" | "md" | "lg";
+  variant?: "ghost" | "outline" | "primary";
+  disabled?: boolean;
 }
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   itemId,
-  isFavorited: isFavoriteProp,
-  size = 24,
+  size = "md",
+  variant = "ghost",
+  disabled = false,
 }) => {
   const { favoritedItemIds, isLoading, toggleFavorite } = useFavorites();
 
-  const isFavorited =
-    isFavoriteProp !== undefined
-      ? isFavoriteProp
-      : favoritedItemIds.includes(itemId);
+  const isFavorited = favoritedItemIds.includes(itemId);
 
   const handlePress = () => {
-    if (!isLoading) {
+    if (!isLoading && !disabled) {
       toggleFavorite(itemId, !isFavorited);
     }
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
+    <IconButton
+      icon="favorite"
+      active={isFavorited}
+      variant={variant}
+      size={size}
+      iconColor="onPrimaryContainer"
       onPress={handlePress}
-      disabled={isLoading}
-      style={{
-        padding: 5,
-        minWidth: size + 10, // accommodate the image plus padding
-        minHeight: size + 10,
-      }}
-    >
-      <Image
-        source={
-          isFavorited
-            ? require("../../../assets/heart-filled.png")
-            : require("../../../assets/heart-unfilled.png")
-        }
-        variant="contain"
-        style={{ width: size, height: size }}
-      />
-    </Button>
+      disabled={isLoading || disabled}
+      accessibilityLabel={
+        isFavorited ? "Remove from favorites" : "Add to favorites"
+      }
+    />
   );
 };

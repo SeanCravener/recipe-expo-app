@@ -19,3 +19,6 @@ export * from "./Forms/EditItemForm";
 export * from "./ItemDetails/ItemHeader";
 export * from "./ItemDetails/ItemDetails";
 export * from "./InstructionFormField/InstructionFormField";
+export * from "./FilterButton/FilterButton";
+export * from "./ShareButton/ShareButton";
+export * from "./SettingsButton/SettingsButton";
