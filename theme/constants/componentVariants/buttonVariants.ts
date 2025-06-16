@@ -42,7 +42,7 @@ export const createButtonVariants = (
           borderRadius: theme.borderRadius.sm,
           alignItems: "center",
           justifyContent: "center",
-          ...theme.elevation.level1,
+          ...theme.elevation.card, // FIX THIS LATER
         },
         label: {
           color: fg,
@@ -70,6 +70,7 @@ export const createButtonVariants = (
           borderRadius: theme.borderRadius.sm,
           alignItems: "center",
           justifyContent: "center",
+          ...theme.elevation.level5,
         },
         label: {
           color: textColor,
@@ -114,6 +115,7 @@ export const createButtonVariants = (
           borderRadius: theme.borderRadius.sm,
           alignItems: "center",
           justifyContent: "center",
+          ...theme.elevation.level5,
         },
         label: {
           color: textColor,

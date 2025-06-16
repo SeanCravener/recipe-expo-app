@@ -52,7 +52,7 @@ export const ItemList = ({
 
   const renderEmptyComponent = useCallback(
     () => (
-      <View variant="centered" padding="lg" style={{ flex: 1, minHeight: 200 }}>
+      <View variant="centered" padding="lg" style={{ minHeight: 200 }}>
         <Text
           variant="bodyNormalRegular"
           color="onSurfaceVariant"
@@ -67,7 +67,7 @@ export const ItemList = ({
 
   if (isLoading) {
     return (
-      <View variant="centered" style={{ flex: 1 }}>
+      <View variant="centered">
         <Loading variant="spinner" />
       </View>
     );

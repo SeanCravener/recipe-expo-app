@@ -6,17 +6,20 @@ import { ViewStyle, StyleSheet } from "react-native";
 export const createViewVariants = (
   theme: Theme
 ): Record<ViewVariant, ViewStyle> => ({
-  default: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
+  default: {},
   centered: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },
   padded: {
-    padding: theme.spacing.lg,
+    padding: theme.spacing.sm,
+  },
+  "padded-vertical": {
+    paddingVertical: theme.spacing.sm,
+  },
+  "screen-content": {
+    gap: 10,
   },
   "full-width": {
     width: "100%",

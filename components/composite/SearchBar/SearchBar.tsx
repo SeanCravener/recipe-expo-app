@@ -37,15 +37,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <View backgroundColor="background" padding="sm" style={style}>
+    <View style={style}>
       <View
         backgroundColor="surfaceVariant"
         borderRadius="md"
-        padding="sm"
         style={{
           flexDirection: "row",
           alignItems: "center",
-          gap: 8,
+          gap: 4,
+          marginHorizontal: theme.spacing.md,
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.lg,
         }}
       >
         <MaterialIcons

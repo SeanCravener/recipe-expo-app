@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { router } from "expo-router";
 import { useAuth } from "@/contexts/auth/AuthContext";
-import { useTheme } from "@/theme/hooks/useTheme";
+import { useTheme } from "@/theme";
 import { View, Text, Button, ToggleText, Error } from "@/components/ui";
 
 export default function SettingsScreen() {

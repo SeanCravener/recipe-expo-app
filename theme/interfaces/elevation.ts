@@ -7,4 +7,5 @@ export interface Elevation {
   level3: ViewStyle;
   level4: ViewStyle;
   level5: ViewStyle;
+  card: ViewStyle;
 }

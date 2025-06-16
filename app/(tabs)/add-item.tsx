@@ -11,7 +11,7 @@ export default function AddItemScreen() {
 
   if (!session?.user?.id) {
     return (
-      <View variant="centered" padding="lg" style={{ flex: 1 }}>
+      <View variant="centered" padding="lg">
         <Text
           variant="bodyLargeRegular"
           color="error"

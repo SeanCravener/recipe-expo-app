@@ -19,20 +19,22 @@ export default function Search() {
   }, 300);
 
   return (
-    <View variant="default" backgroundColor="background">
-      <SearchBar onSearch={debouncedSearch} />
-      <ItemList
-        data={items}
-        isLoading={isLoading}
-        isFetchingNextPage={isFetchingNextPage}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        emptyText={
-          searchQuery
-            ? "No items found for your search"
-            : "Start typing to search items"
-        }
-      />
+    <View variant="padded">
+      <View variant="screen-content">
+        <SearchBar onSearch={debouncedSearch} />
+        <ItemList
+          data={items}
+          isLoading={isLoading}
+          isFetchingNextPage={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+          emptyText={
+            searchQuery
+              ? "No items found for your search"
+              : "Start typing to search items"
+          }
+        />
+      </View>
     </View>
   );
 }

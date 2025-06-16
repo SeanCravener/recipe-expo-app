@@ -9,6 +9,8 @@ export type ViewVariant =
   | "default"
   | "centered"
   | "padded"
+  | "padded-vertical"
+  | "screen-content"
   | "full-width"
   | "content"
   | "card-rectangle"

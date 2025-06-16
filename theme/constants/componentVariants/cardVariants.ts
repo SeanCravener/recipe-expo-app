@@ -27,6 +27,7 @@ export const createCardVariants = (
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
-    ...theme.elevation.level1, // uses the new ViewStyle object
+    marginHorizontal: theme.spacing.md,
+    ...theme.elevation.card, // uses the new ViewStyle object
   },
 });
