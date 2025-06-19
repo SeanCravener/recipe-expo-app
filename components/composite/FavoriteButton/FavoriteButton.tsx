@@ -11,7 +11,7 @@ interface FavoriteButtonProps {
 
 export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   itemId,
-  size = "md",
+  size = "sm",
   variant = "ghost",
   disabled = false,
 }) => {

@@ -2,16 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { Database } from "@/types/database/supabase";
 
-type Category = Database["public"]["Tables"]["item_categories"]["Row"];
+type UserId = string;
+type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
-export function useCategories() {
+export function useGetUserProfile(id: UserId) {
   return useQuery({
-    queryKey: ["categories"],
-    queryFn: async (): Promise<Category[]> => {
+    queryKey: ["profile", id],
+    queryFn: async (): Promise<Profile[]> => {
       const { data, error } = await supabase
-        .from("item_categories")
+        .from("profiles")
         .select("*")
-        .order("category");
+        .eq("id", id)
+        .limit(1);
 
       if (error) throw error;
       return data;

@@ -54,6 +54,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onPress }) => {
                   {item.title}
                 </Text>
               </View>
+              <AuthorInfo userId={item.user_id} />
 
               <View variant="row" style={{ alignItems: "center", gap: 8 }}>
                 <Text variant="bodySmallRegular" color="onSurfaceVariant">

@@ -48,6 +48,7 @@ export function useItems(
               `
               item:items!inner(
                 id,
+                user_id,
                 title,
                 main_image,
                 average_rating,
@@ -98,6 +99,7 @@ export function useItems(
         // Base Supabase query for other modes (items table directly)
         let dbQuery = supabase.from("items").select(`
           id,
+          user_id,
           title,
           main_image,
           average_rating,
@@ -136,6 +138,7 @@ export function useItems(
         mode === "favorited"
           ? itemsData.map((fav: any) => ({
               id: fav.item.id,
+              user_id: fav.item.user_id,
               title: fav.item.title,
               main_image: fav.item.main_image,
               average_rating: fav.item.average_rating,
@@ -144,6 +147,7 @@ export function useItems(
             }))
           : itemsData.map((item: any) => ({
               id: item.id,
+              user_id: item.user_id,
               title: item.title,
               main_image: item.main_image,
               average_rating: item.average_rating,

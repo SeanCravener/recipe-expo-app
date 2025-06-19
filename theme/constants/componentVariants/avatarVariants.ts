@@ -7,8 +7,8 @@ export const createAvatarVariants = (
   theme: Theme
 ): Record<AvatarVariant, ImageStyle> => ({
   sm: {
-    width: theme.spacing.xl, // ~32
-    height: theme.spacing.xl,
+    width: theme.spacing.lg, // ~32
+    height: theme.spacing.lg,
     borderRadius: theme.borderRadius.full,
     backgroundColor: theme.colors.surfaceVariant,
   },

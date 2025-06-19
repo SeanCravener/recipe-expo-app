@@ -1,6 +1,4 @@
-import { Database } from "./supabase";
-
-type DbItem = Database["public"]["Tables"]["items"]["Row"];
+import { Item as DbItem } from "./database";
 
 export interface Ingredient {
   value: string;
@@ -18,6 +16,7 @@ export interface Item extends Omit<DbItem, "instructions"> {
 
 export interface ItemSummary {
   id: string;
+  user_id: string;
   title: string;
   main_image: string;
   average_rating: number | null;

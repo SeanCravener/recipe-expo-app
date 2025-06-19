@@ -16,7 +16,7 @@ interface AvatarProps {
 export const Avatar: React.FC<AvatarProps> = ({
   variant = "md",
   source,
-  initials,
+  initials = "sc",
   style,
 }) => {
   const { theme } = useTheme();

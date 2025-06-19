@@ -1,5 +1,3 @@
-// components/ui/Text/Text.tsx   (replace entire file)
-
 import React from "react";
 import {
   Text as RNText,
@@ -34,7 +32,7 @@ export interface ThemedTextProps extends RNTextProps {
 }
 
 export const Text: React.FC<ThemedTextProps> = ({
-  variant = "body",
+  variant = "bodyNormalRegular",
   color,
   fontSize,
   fontWeight,
