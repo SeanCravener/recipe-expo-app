@@ -1,5 +1,15 @@
+//
+//  TODO:
+//    1. Fix styling that I did when messing around with shadows.
+//    2. Figure out new styling/shadow.
+//    3. Add functional Filter Button that brings up modal from bottom.
+//    4. Adjust font in search bar and change MaterialIcons to svg Icon in Assets/Icons.
+//      Might have to tweak Input component further.
+//    5. Add Settings Button.? Keep?
+//
+
 import React, { useState } from "react";
-import { Pressable, Keyboard, StyleProp, ViewStyle } from "react-native";
+import { Keyboard, StyleProp, ViewStyle } from "react-native";
 import { useTheme } from "@/theme/hooks/useTheme";
 import { Input, View, Button } from "@/components/ui";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -39,15 +49,20 @@ export const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <View style={style}>
       <View
-        backgroundColor="surfaceVariant"
+        backgroundColor="primaryContainer"
         borderRadius="md"
+        // Messed around with styling input container for search, need to finalize later
+        // this is just temporary
         style={{
           flexDirection: "row",
           alignItems: "center",
           gap: 4,
-          marginHorizontal: theme.spacing.md,
+          borderWidth: 1,
+          boxShadow: "0px 0px 6px 4px #5EA6AB inset",
+          borderColor: theme.colors.onPrimaryContainer,
+          marginHorizontal: theme.spacing.sm,
           paddingHorizontal: theme.spacing.md,
-          paddingVertical: theme.spacing.lg,
+          paddingVertical: theme.spacing.sm,
         }}
       >
         <MaterialIcons
