@@ -12,7 +12,7 @@ export function ProtectedRoute({ children, permission }: ProtectedRouteProps) {
   const { session } = useAuth();
 
   if (!session && !Permission.VIEW_ITEMS) {
-    router.replace("/sign-in");
+    router.replace("/auth");
     return null;
   }
 
