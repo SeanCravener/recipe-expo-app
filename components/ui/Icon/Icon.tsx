@@ -119,7 +119,7 @@ export const Icon: React.FC<IconProps> = ({
   name,
   variant,
   size = "md",
-  color = "onPrimary",
+  color = "onSurfaceVariant",
   active = false,
   onPress,
   style,

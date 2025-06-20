@@ -1,27 +1,50 @@
+import React from "react";
 import { Tabs } from "expo-router";
-import { useAuth } from "../../contexts/auth/AuthContext";
-import { Permission } from "../../lib/permissions";
+import { Icon } from "@/components/ui";
+import { useTheme } from "@/theme/hooks/useTheme";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import { Permission } from "@/lib/permissions";
+import type { IconName } from "@/components/ui/Icon/Icon";
 
 type TabConfig = {
   name: string;
   title: string;
+  icon: IconName;
   permission?: Permission;
 };
 
 const TAB_CONFIG: TabConfig[] = [
-  { name: "index", title: "Home" },
-  // { name: 'crafts', title: 'Crafts' },
-  // { name: 'new-craft', title: 'New Craft', permission: Permission.CREATE_ITEM },
-  // { name: 'favorites', title: 'Favorites', permission: Permission.FAVORITE_ITEM },
-  { name: "profile", title: "Profile", permission: Permission.VIEW_PROFILE },
+  {
+    name: "index",
+    title: "Home",
+    icon: "home",
+  },
+  {
+    name: "search",
+    title: "Search",
+    icon: "search",
+  },
+  {
+    name: "add-item",
+    title: "Add",
+    icon: "add",
+    permission: Permission.CREATE_ITEM,
+  },
+  {
+    name: "profile",
+    title: "Profile",
+    icon: "profile",
+    permission: Permission.VIEW_PROFILE,
+  },
 ];
 
 export default function TabsLayout() {
+  const { theme } = useTheme();
   const { session } = useAuth();
 
-  const createAuthListener =
-    (permission?: Permission) =>
-    ({ navigation }: any) => ({
+  // Modern auth handler - more declarative approach
+  const handleTabPress = (permission?: Permission) => {
+    return ({ navigation }: any) => ({
       tabPress: (e: any) => {
         if (permission && !session) {
           e.preventDefault();
@@ -29,17 +52,44 @@ export default function TabsLayout() {
         }
       },
     });
+  };
 
   return (
-    <Tabs>
-      {TAB_CONFIG.map(({ name, title, permission }) => (
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.outline,
+          borderTopWidth: 1,
+          paddingBottom: 8,
+          paddingTop: 8,
+          height: 60,
+        },
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarLabelStyle: {
+          fontSize: theme.fontSize.xs,
+          fontWeight: theme.fontWeight.medium as any,
+          marginTop: 4,
+        },
+      }}
+    >
+      {TAB_CONFIG.map(({ name, title, icon, permission }) => (
         <Tabs.Screen
           key={name}
           name={name}
           options={{
             title,
+            tabBarIcon: ({ focused }) => (
+              <Icon
+                name={icon}
+                variant={focused ? "filled" : "unfilled"}
+                size="xl"
+              />
+            ),
           }}
-          listeners={permission ? createAuthListener(permission) : undefined}
+          listeners={permission ? handleTabPress(permission) : undefined}
         />
       ))}
     </Tabs>
