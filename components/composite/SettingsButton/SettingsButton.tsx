@@ -35,6 +35,7 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
     <IconButton
       icon="settings"
       variant="primary"
+      iconVariant="filled"
       size={size}
       onPress={handlePress}
       disabled={disabled}

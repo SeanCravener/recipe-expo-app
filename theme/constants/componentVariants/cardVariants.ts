@@ -20,14 +20,15 @@ export const createCardVariants = (
     padding: theme.spacing.md,
     borderWidth: 1,
     borderColor: theme.colors.outline,
+    ...theme.elevation.card,
   },
 
   /** Elevated filled card */
   elevated: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    marginHorizontal: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.primaryContainer,
     ...theme.elevation.card, // uses the new ViewStyle object
   },
 });

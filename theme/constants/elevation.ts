@@ -12,7 +12,7 @@ const shadow = (
   height: number
 ): ViewStyle => ({
   elevation, // Android
-  shadowColor: "#000", // iOS shadow base
+  shadowColor: "#5A797B", // iOS shadow base
   shadowOpacity: opacity,
   shadowRadius: radius,
   shadowOffset: { width, height },
@@ -27,5 +27,5 @@ export const elevation: Elevation = {
   level3: shadow(4, 0.08, 8, 0, 4),
   level4: shadow(8, 0.09, 16, 0, 8),
   level5: shadow(12, 0.1, 24, 0, 12),
-  card: shadow(4, 0.2, 8, 0, 0),
+  card: shadow(4, 0.25, 26, 0, 12),
 };

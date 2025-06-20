@@ -33,6 +33,8 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onPress }) => {
             minHeight: 120,
             marginHorizontal: 12,
             alignItems: "center",
+            justifyContent: "center",
+            paddingHorizontal: 10,
           }}
         >
           <View
@@ -103,7 +105,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, onPress }) => {
             <View
               style={{
                 position: "absolute",
-                top: 0,
+                top: 6,
                 right: 0,
               }}
             >

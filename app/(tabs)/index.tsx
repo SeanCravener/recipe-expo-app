@@ -30,7 +30,8 @@ export default function Home() {
               style={{
                 paddingTop: insets.top, // Dynamic padding based on device
                 boxShadow: "0px 0px 8px 1px #A1D9DD",
-                borderRadius: 0,
+                borderBottomColor: theme.colors.primaryContainer,
+                borderBottomWidth: 1,
               }}
             >
               {/* Title Row */}
@@ -44,7 +45,7 @@ export default function Home() {
                 }}
               >
                 <View style={{ width: 40 }} />
-                <Text variant="headerThree">{options.title}</Text>
+                <Text variant="bodyXLargeBold">{options.title}</Text>
                 <SettingsButton size="lg" />
               </View>
             </View>
