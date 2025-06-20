@@ -13,8 +13,12 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
   onTabChange,
 }) => {
   return (
-    <View variant="centered" backgroundColor="surfaceVariant" padding="xl">
-      <View style={{ marginBottom: 24 }}>
+    <View
+      style={{ justifyContent: "center", alignItems: "center" }}
+      backgroundColor="surface"
+      padding="sm"
+    >
+      <View style={{ marginVertical: 24 }}>
         <Avatar
           variant="lg"
           source={

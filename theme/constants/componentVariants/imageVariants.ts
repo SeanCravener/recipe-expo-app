@@ -24,7 +24,6 @@ export const createImageVariants = (
 
   /** Contain image fits inside parent without cropping */
   contain: {
-    flex: 1,
     width: "100%",
     height: "100%",
     resizeMode: "contain",

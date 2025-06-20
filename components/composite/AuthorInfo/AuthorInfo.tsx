@@ -20,7 +20,7 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({
       <Avatar
         variant="sm"
         initials={avatarLabel}
-        source={avatarSrc}
+        source={userProfile?.[0]?.avatar_url || avatarSrc}
         style={{ marginRight: 6 }} // keeping this since you don't have marginRight token override
       />
       <Text
