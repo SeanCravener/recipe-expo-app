@@ -19,22 +19,22 @@ export default function Search() {
   }, 300);
 
   return (
-    <View variant="padded">
-      <View variant="screen-content">
-        <SearchBar onSearch={debouncedSearch} />
-        <ItemList
-          data={items}
-          isLoading={isLoading}
-          isFetchingNextPage={isFetchingNextPage}
-          hasNextPage={hasNextPage}
-          fetchNextPage={fetchNextPage}
-          emptyText={
-            searchQuery
-              ? "No items found for your search"
-              : "Start typing to search items"
-          }
-        />
-      </View>
+    <View variant="padded-vertical" style={{ flex: 1 }}>
+      {" "}
+      {/* Fixed scrolling issue with flex style, need to come back to move search bar to header/top bar */}
+      <SearchBar onSearch={debouncedSearch} />
+      <ItemList
+        data={items}
+        isLoading={isLoading}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+        fetchNextPage={fetchNextPage}
+        emptyText={
+          searchQuery
+            ? "No items found for your search"
+            : "Start typing to search items"
+        }
+      />
     </View>
   );
 }

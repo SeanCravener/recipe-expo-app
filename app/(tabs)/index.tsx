@@ -13,7 +13,7 @@ export default function Home() {
   } = useItems("general");
 
   return (
-    <View variant="padded-vertical">
+    <View variant="padded-vertical" style={{ flex: 1 }}>
       <ItemList
         data={items}
         isLoading={isLoading}
