@@ -16,14 +16,18 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({
   const { data: userProfile, isLoading } = useGetUserProfile(userId);
 
   return (
-    <View variant="row" margin="md">
+    <View variant="row" style={{ alignItems: "center", marginTop: 2 }}>
       <Avatar
         variant="sm"
         initials={avatarLabel}
         source={avatarSrc}
-        style={{ marginRight: 8 }} // keeping this since you don't have marginRight token override
+        style={{ marginRight: 6 }} // keeping this since you don't have marginRight token override
       />
-      <Text variant="bodyXSmallRegular" color="onSurfaceVariant">
+      <Text
+        variant="bodyXSmallRegular"
+        color="onSurfaceVariant"
+        numberOfLines={1}
+      >
         {userProfile?.[0]?.username || "No user found"}
       </Text>
     </View>

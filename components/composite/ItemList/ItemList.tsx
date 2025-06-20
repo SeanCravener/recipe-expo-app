@@ -52,7 +52,7 @@ export const ItemList = ({
 
   const renderEmptyComponent = useCallback(
     () => (
-      <View variant="centered" padding="lg" style={{ minHeight: 200 }}>
+      <View variant="centered" padding="lg" style={{ flex: 1, minHeight: 200 }}>
         <Text
           variant="bodyNormalRegular"
           color="onSurfaceVariant"
@@ -67,7 +67,7 @@ export const ItemList = ({
 
   if (isLoading) {
     return (
-      <View variant="centered">
+      <View variant="centered" style={{ flex: 1 }}>
         <Loading variant="spinner" />
       </View>
     );
@@ -85,8 +85,13 @@ export const ItemList = ({
       ListFooterComponent={renderFooter}
       ListEmptyComponent={renderEmptyComponent}
       contentContainerStyle={
-        !data || data.length === 0 ? { flex: 1 } : undefined
+        !data || data.length === 0 ? { flex: 1 } : { paddingBottom: 20 }
       }
+      style={{ flex: 1 }}
+      removeClippedSubviews={false}
+      initialNumToRender={10}
+      maxToRenderPerBatch={5}
+      windowSize={10}
     />
   );
 };
