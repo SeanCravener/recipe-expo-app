@@ -1,27 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { router } from "expo-router";
 import { IconButton } from "@/components/ui";
+import { useTheme } from "@/theme/hooks/useTheme";
 
 interface SettingsButtonProps {
   size?: "sm" | "md" | "lg";
-  variant?: "ghost" | "outline" | "primary";
   disabled?: boolean;
-  onPress?: () => void; // Optional custom action
+  onPress?: () => void;
 }
 
 export const SettingsButton: React.FC<SettingsButtonProps> = ({
-  size = "md",
-  variant = "ghost",
+  size = "lg",
   disabled = false,
   onPress,
 }) => {
+  const [isPressed, setIsPressed] = useState(false);
+
   const handlePress = () => {
+    setIsPressed(true);
+
+    // Reset pressed state after a short delay
+    setTimeout(() => setIsPressed(false), 150);
+
     if (disabled) return;
 
     if (onPress) {
       onPress();
     } else {
-      // Default action: navigate to settings
       router.push("/settings");
     }
   };
@@ -29,10 +34,12 @@ export const SettingsButton: React.FC<SettingsButtonProps> = ({
   return (
     <IconButton
       icon="settings"
-      variant={variant}
+      variant="primary"
       size={size}
       onPress={handlePress}
       disabled={disabled}
+      active={isPressed}
+      iconColor={isPressed ? "onPrimary" : "onSurface"}
       accessibilityLabel="Open settings"
     />
   );
