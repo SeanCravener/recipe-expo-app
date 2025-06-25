@@ -22,3 +22,4 @@ export * from "./ShareButton/ShareButton";
 export * from "./SettingsButton/SettingsButton";
 export * from "./BackButton/BackButton";
 export * from "./EditButton/EditButton";
+export * from "./Forms/FormSection";

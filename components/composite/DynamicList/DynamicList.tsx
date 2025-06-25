@@ -1,8 +1,7 @@
 import React from "react";
 import { Control, FieldValues, FieldPath } from "react-hook-form";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@/theme/hooks/useTheme";
-import { View, Text, Button } from "@/components/ui";
+import { View, Text, Icon } from "@/components/ui";
 import { ItemFormField } from "@/components/composite";
 
 interface DynamicListProps<T extends FieldValues> {
@@ -14,9 +13,14 @@ interface DynamicListProps<T extends FieldValues> {
   remove: (index: number) => void;
   max: number;
   placeholder?: string;
-  // New props for custom field components
+  // Enhanced props
   customFieldComponent?: React.ComponentType<any>;
   customFieldProps?: any;
+  disabled?: boolean;
+  helpText?: string;
+  showCounter?: boolean;
+  addButtonText?: string;
+  removeButtonAccessibilityLabel?: string;
 }
 
 export const DynamicList = <T extends FieldValues>({
@@ -30,26 +34,68 @@ export const DynamicList = <T extends FieldValues>({
   placeholder,
   customFieldComponent: CustomField,
   customFieldProps,
+  disabled = false,
+  helpText,
+  showCounter = true,
+  addButtonText,
+  removeButtonAccessibilityLabel,
 }: DynamicListProps<T>) => {
   const { theme } = useTheme();
 
+  // Memoized add button text
+  const defaultAddButtonText = React.useMemo(
+    () => addButtonText || `Add ${label.toLowerCase().slice(0, -1)}`, // Remove 's' from plural
+    [addButtonText, label]
+  );
+
+  // Memoized accessibility label
+  const defaultRemoveLabel = React.useMemo(
+    () =>
+      removeButtonAccessibilityLabel ||
+      `Remove ${label.toLowerCase().slice(0, -1)}`,
+    [removeButtonAccessibilityLabel, label]
+  );
+
+  // Check if we can add more items
+  const canAddMore = fields.length < max && !disabled;
+
   return (
-    <View margin="md">
-      {/* Header with label and counter */}
-      <View variant="row" style={{ marginBottom: 4 }}>
-        <Text variant="bodyNormalBold">{label}</Text>
-        <Text
-          variant="bodySmallRegular"
-          color="onSurfaceVariant"
-          style={{ marginLeft: 4 }}
-        >
-          ({fields.length}/{max})
-        </Text>
+    <View style={{ marginBottom: theme.spacing.lg }}>
+      {/* Header with label, counter, and help text */}
+      <View style={{ marginBottom: theme.spacing.sm }}>
+        <View variant="row" style={{ alignItems: "center", marginBottom: 4 }}>
+          <Text variant="bodyNormalBold">{label}</Text>
+          {showCounter && (
+            <Text
+              variant="bodySmallRegular"
+              color="onSurfaceVariant"
+              style={{ marginLeft: theme.spacing.xs }}
+            >
+              ({fields.length}/{max})
+            </Text>
+          )}
+        </View>
+
+        {helpText && (
+          <Text
+            variant="bodySmallRegular"
+            color="onSurfaceVariant"
+            style={{ marginTop: 2 }}
+          >
+            {helpText}
+          </Text>
+        )}
       </View>
 
       {/* Dynamic field list */}
       {fields.map((field, index) => (
-        <View key={field.id}>
+        <View
+          key={field.id}
+          style={{
+            marginBottom: theme.spacing.sm,
+            opacity: disabled ? 0.6 : 1,
+          }}
+        >
           {CustomField ? (
             // Custom field component branch
             <View variant="row" style={{ alignItems: "flex-start" }}>
@@ -58,84 +104,118 @@ export const DynamicList = <T extends FieldValues>({
                   control={control}
                   name={`${name}.${index}` as FieldPath<T>}
                   index={index}
+                  disabled={disabled}
                   {...customFieldProps}
                 />
               </View>
-              <Button
-                variant="ghost"
-                size="sm"
-                onPress={() => remove(index)}
+
+              {/* Remove button */}
+              <View
                 style={{
-                  marginLeft: 8,
-                  marginTop: 8,
-                  minWidth: 40,
+                  marginLeft: theme.spacing.sm,
+                  marginTop: theme.spacing.sm,
+                  minWidth: 44,
+                  minHeight: 44,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <MaterialIcons
-                  name="remove-circle"
-                  size={20}
-                  color={theme.colors.error}
+                <Icon
+                  name="edit-three" // Use as close/remove icon
+                  variant="unfilled"
+                  size="md"
+                  color={disabled ? "onSurfaceVariant" : "error"}
+                  onPress={disabled ? undefined : () => remove(index)}
+                  hitSlop="md"
                 />
-              </Button>
+              </View>
             </View>
           ) : (
             // Default simple field branch
-            <View
-              variant="row"
-              style={{ marginBottom: 8, alignItems: "flex-start" }}
-            >
+            <View variant="row" style={{ alignItems: "flex-start" }}>
               <View style={{ flex: 1 }}>
                 <ItemFormField
                   control={control}
-                  name={`${name}.${index}` as FieldPath<T>}
+                  name={`${name}.${index}.value` as FieldPath<T>} // Fixed: added .value for ingredient structure
                   label=""
                   placeholder={placeholder}
+                  disabled={disabled}
                 />
               </View>
-              <Button
-                variant="ghost"
-                size="sm"
-                onPress={() => remove(index)}
+
+              {/* Remove button */}
+              <View
                 style={{
-                  marginLeft: 8,
-                  marginTop: 24, // align with input field
-                  minWidth: 40,
+                  marginLeft: theme.spacing.sm,
+                  marginTop: theme.spacing.lg, // Align with input field
+                  minWidth: 44,
+                  minHeight: 44,
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <MaterialIcons
-                  name="remove-circle"
-                  size={20}
-                  color={theme.colors.error}
+                <Icon
+                  name="edit-three" // Use as close/remove icon
+                  variant="unfilled"
+                  size="md"
+                  color={disabled ? "onSurfaceVariant" : "error"}
+                  onPress={disabled ? undefined : () => remove(index)}
+                  hitSlop="md"
                 />
-              </Button>
+              </View>
             </View>
           )}
         </View>
       ))}
 
       {/* Add button */}
-      {fields.length < max && (
-        <Button
-          variant="link"
-          size="sm"
-          onPress={append}
+      {canAddMore && (
+        <View
           style={{
+            marginTop: fields.length > 0 ? theme.spacing.sm : 0,
             alignSelf: "flex-start",
-            marginTop: 8,
           }}
         >
-          <View variant="row" style={{ alignItems: "center" }}>
-            <MaterialIcons
-              name="add-circle"
-              size={20}
-              color={theme.colors.primary}
-              style={{ marginRight: 4 }}
+          <View
+            variant="row"
+            style={{
+              alignItems: "center",
+              paddingVertical: theme.spacing.sm,
+              paddingHorizontal: theme.spacing.sm,
+            }}
+          >
+            <Icon
+              name="add"
+              variant="unfilled"
+              size="md"
+              color="primary"
+              onPress={append}
+              hitSlop="md"
+              style={{ marginRight: theme.spacing.xs }}
             />
-            <Text variant="bodySmallMedium" color="primary">
-              Add {label.toLowerCase()}
+            <Text
+              variant="bodySmallMedium"
+              color="primary"
+              onPress={append} // Make text clickable too
+            >
+              {defaultAddButtonText}
             </Text>
           </View>
-        </Button>
+        </View>
+      )}
+
+      {/* Show message when max reached */}
+      {fields.length >= max && (
+        <Text
+          variant="bodySmallRegular"
+          color="onSurfaceVariant"
+          style={{
+            marginTop: theme.spacing.sm,
+            fontStyle: "italic",
+          }}
+        >
+          Maximum {max} {label.toLowerCase()} reached
+        </Text>
       )}
     </View>
   );
