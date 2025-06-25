@@ -19,7 +19,7 @@ export const createAvatarVariants = (
     backgroundColor: theme.colors.surfaceVariant,
   },
   lg: {
-    width: theme.spacing.xxl + theme.spacing.sm, // 48 + 8 = 56 (~60)
+    width: theme.spacing.xxl + theme.spacing.sm + theme.spacing.sm, // 48 + 8 = 56 (~60)
     height: theme.spacing.xxl + theme.spacing.sm,
     borderRadius: theme.borderRadius.full,
     backgroundColor: theme.colors.surfaceVariant,

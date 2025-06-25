@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Pressable } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@/theme/hooks/useTheme";
-import { Button, Modal, Text, View } from "@/components/ui";
+import { Button, Modal, Text, View, Icon } from "@/components/ui";
 
 interface RatingModalProps {
   visible: boolean;
@@ -10,6 +9,7 @@ interface RatingModalProps {
   onClose: () => void;
   initialRating?: number;
   maxStars?: number;
+  itemTitle?: string;
 }
 
 export const RatingModal: React.FC<RatingModalProps> = ({
@@ -18,6 +18,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   onClose,
   initialRating = 0,
   maxStars = 5,
+  itemTitle = "This Item",
 }) => {
   const { theme } = useTheme();
   const [selectedRating, setSelectedRating] = useState(initialRating);
@@ -41,18 +42,19 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   return (
     <Modal variant="default" visible={visible} onClose={onClose}>
       <Text
-        variant="bodyLargeMedium"
+        variant="bodyLargeRegular"
         style={{ marginBottom: 16, textAlign: "center" }}
       >
-        Rate This Item
+        How would you rate{" "}
+        <Text variant="bodyLargeMedium">{itemTitle} Recipe?</Text>
       </Text>
 
       <View
         variant="row"
         style={{
-          justifyContent: "center",
+          justifyContent: "space-evenly",
           marginBottom: 24,
-          gap: 4,
+          paddingHorizontal: 24,
         }}
       >
         {Array.from({ length: maxStars }, (_, index) => {
@@ -64,15 +66,14 @@ export const RatingModal: React.FC<RatingModalProps> = ({
               style={{
                 padding: 4,
                 borderRadius: theme.borderRadius.sm,
+                marginVertical: 4,
               }}
               hitSlop={8}
             >
-              <MaterialIcons
-                name={filled ? "star" : "star-border"}
+              <Icon
+                name="star"
+                variant={filled ? "filled" : "unfilled"}
                 size={32}
-                color={
-                  filled ? theme.colors.primary : theme.colors.onSurfaceVariant
-                }
               />
             </Pressable>
           );
@@ -92,7 +93,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
           onPress={onClose}
           style={{ flex: 1 }}
         >
-          Cancel
+          Not Now
         </Button>
 
         <Button

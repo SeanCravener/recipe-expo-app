@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { View } from "@/components/ui";
-import { ItemList, ProfileHeader } from "@/components/composite";
+import { Stack } from "expo-router";
+import { View, Text } from "@/components/ui";
+import {
+  ItemList,
+  ProfileHeader,
+  SettingsButton,
+} from "@/components/composite";
 import { useItems } from "@/hooks/useItems";
 import { supabase } from "@/lib/supabase";
 import { ProtectedRoute } from "@/components/protected/ProtectedRoute";
 import { Permission } from "@/lib/permissions";
+import { useTheme } from "@/theme/hooks/useTheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Profile() {
   // Wrap the entire component content in ProtectedRoute
@@ -21,6 +28,8 @@ function ProfileContent() {
     "created"
   );
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
+  const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
 
   // Fetch user-created items
   const {
@@ -79,11 +88,45 @@ function ProfileContent() {
     activeTab === "created" ? fetchNextCreated : fetchNextFavorited;
 
   return (
-    <View variant="default" backgroundColor="background">
-      <ProfileHeader
-        avatarUri={avatarUrl}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
+    <>
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: "Profile",
+          header: ({ options }) => (
+            <View
+              backgroundColor="surface"
+              style={{
+                paddingTop: insets.top, // Dynamic padding based on device
+                boxShadow: "0px 0px 8px 1px #A1D9DD",
+                borderBottomColor: theme.colors.primaryContainer,
+                borderBottomWidth: 1,
+              }}
+            >
+              {/* Title Row */}
+              <View
+                variant="row"
+                style={{
+                  paddingVertical: 10,
+                  paddingHorizontal: 10,
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <View style={{ width: 40 }} />
+                <Text variant="bodyXLargeBold">{options.title}</Text>
+                <SettingsButton size="lg" />
+              </View>
+              <View style={{ marginBottom: 12 }}>
+                <ProfileHeader
+                  avatarUri={avatarUrl}
+                  activeTab={activeTab}
+                  onTabChange={handleTabChange}
+                />
+              </View>
+            </View>
+          ),
+        }}
       />
       <ItemList
         data={currentData}
@@ -97,6 +140,6 @@ function ProfileContent() {
             : "You haven't favorited any items yet"
         }
       />
-    </View>
+    </>
   );
 }

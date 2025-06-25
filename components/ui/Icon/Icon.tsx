@@ -7,6 +7,7 @@ import { ColorKey, SpacingKey } from "@/theme/types/keys";
 // Import your SVG icons
 import AddFilled from "@/assets/icons/add-filled.svg";
 import AddUnfilled from "@/assets/icons/add-unfilled.svg";
+import ArrowBack from "@/assets/icons/arrow-back.svg";
 import AvatarDefaultFilled from "@/assets/icons/avatar-default-filled.svg";
 import AvatarDefaultUnfilled from "@/assets/icons/avatar-default-unfilled.svg";
 import BookmarkFilled from "@/assets/icons/bookmark-filled.svg";
@@ -27,6 +28,7 @@ import HeartAddFilled from "@/assets/icons/heart-add-filled.svg";
 import HeartAddUnfilled from "@/assets/icons/heart-add-unfilled.svg";
 import HomeFilled from "@/assets/icons/home-filled.svg";
 import HomeUnfilled from "@/assets/icons/home-unfilled.svg";
+import Menu from "@/assets/icons/menu.svg";
 import ProfileFilled from "@/assets/icons/profile-filled.svg";
 import ProfileUnfilled from "@/assets/icons/profile-unfilled.svg";
 import SearchFilled from "@/assets/icons/search-filled.svg";
@@ -45,6 +47,7 @@ import SunFilled from "@/assets/icons/sun-filled.svg";
 // Icon name type based on your SVG files
 export type IconName =
   | "add"
+  | "arrow-back"
   | "avatar-default"
   | "bookmark"
   | "bookmark-two"
@@ -55,6 +58,7 @@ export type IconName =
   | "filter"
   | "heart-add"
   | "home"
+  | "menu"
   | "profile"
   | "search"
   | "settings"
@@ -73,6 +77,7 @@ const iconRegistry: Record<
   Record<IconVariant, React.FC<SvgProps>>
 > = {
   add: { filled: AddFilled, unfilled: AddUnfilled },
+  "arrow-back": { filled: ArrowBack, unfilled: ArrowBack },
   "avatar-default": {
     filled: AvatarDefaultFilled,
     unfilled: AvatarDefaultUnfilled,
@@ -86,6 +91,7 @@ const iconRegistry: Record<
   filter: { filled: FilterFilled, unfilled: FilterUnfilled },
   "heart-add": { filled: HeartAddFilled, unfilled: HeartAddUnfilled },
   home: { filled: HomeFilled, unfilled: HomeUnfilled },
+  menu: { filled: Menu, unfilled: Menu },
   profile: { filled: ProfileFilled, unfilled: ProfileUnfilled },
   search: { filled: SearchFilled, unfilled: SearchUnfilled },
   settings: { filled: SettingsFilled, unfilled: SettingsUnfilled },

@@ -29,6 +29,15 @@ export const createCardVariants = (
     borderRadius: theme.borderRadius.md,
     borderWidth: 1,
     borderColor: theme.colors.primaryContainer,
-    ...theme.elevation.card, // uses the new ViewStyle object
+    ...theme.elevation.card,
+  },
+
+  /** Form section card */
+  form: {
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
+    ...theme.elevation.level1,
   },
 });

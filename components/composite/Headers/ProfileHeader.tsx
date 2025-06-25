@@ -18,7 +18,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({
       backgroundColor="surface"
       padding="sm"
     >
-      <View style={{ marginVertical: 24 }}>
+      <View style={{ marginBottom: 16 }}>
         <Avatar
           variant="lg"
           source={

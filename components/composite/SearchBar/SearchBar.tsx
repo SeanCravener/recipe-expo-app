@@ -11,7 +11,7 @@
 import React, { useState } from "react";
 import { Keyboard, StyleProp, ViewStyle } from "react-native";
 import { useTheme } from "@/theme/hooks/useTheme";
-import { Input, View, Button } from "@/components/ui";
+import { Input, View, Button, Icon } from "@/components/ui";
 import { MaterialIcons } from "@expo/vector-icons";
 
 interface SearchBarProps {
@@ -57,33 +57,38 @@ export const SearchBar: React.FC<SearchBarProps> = ({
           flexDirection: "row",
           alignItems: "center",
           gap: 4,
-          borderWidth: 1,
+          borderWidth: 0,
           boxShadow: "0px 0px 6px 4px #5EA6AB inset",
           borderColor: theme.colors.onPrimaryContainer,
           marginHorizontal: theme.spacing.sm,
-          paddingHorizontal: theme.spacing.md,
+          paddingHorizontal: theme.spacing.sm,
           paddingVertical: theme.spacing.sm,
+          marginBottom: theme.spacing.sm,
         }}
       >
-        <MaterialIcons
+        {/* <MaterialIcons
           name="search"
           size={20}
           color={theme.colors.onSurfaceVariant}
+        /> */}
+
+        <Icon
+          name="search"
+          variant="filled"
+          size={"sm"}
+          style={{ transform: [{ scaleX: -1 }] }}
         />
 
         <Input
-          variant="default"
+          variant="sm"
           placeholder={placeholder}
           value={searchValue}
           onChangeText={setValue}
           onSubmitEditing={handleSubmit}
           containerStyle={{
             flex: 1,
-            borderWidth: 0, // remove border since we're in a container
+            borderWidth: 0,
             backgroundColor: "transparent",
-          }}
-          fieldStyle={{
-            fontSize: 16,
           }}
           returnKeyType="search"
           autoCapitalize="none"

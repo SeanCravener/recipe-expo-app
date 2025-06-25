@@ -1,13 +1,15 @@
 import React from "react";
 import { Share } from "react-native";
-import { IconButton } from "@/components/ui";
+import { IconButton, IconVariant } from "@/components/ui";
+import { ButtonSize, ButtonVariant } from "@/theme/types/componentVariants";
 
 interface ShareButtonProps {
   title: string;
   message: string;
   url?: string;
-  size?: "sm" | "md" | "lg";
-  variant?: "ghost" | "outline" | "primary";
+  size?: ButtonSize;
+  variant?: ButtonVariant;
+  iconVariant?: IconVariant;
   disabled?: boolean;
 }
 
@@ -17,6 +19,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
   url,
   size = "md",
   variant = "ghost",
+  iconVariant = "filled",
   disabled = false,
 }) => {
   const handleShare = async () => {
@@ -37,6 +40,7 @@ export const ShareButton: React.FC<ShareButtonProps> = ({
     <IconButton
       icon="share"
       variant={variant}
+      iconVariant={iconVariant}
       size={size}
       onPress={handleShare}
       disabled={disabled}

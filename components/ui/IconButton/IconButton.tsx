@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleProp, ViewStyle } from "react-native";
+import { ViewStyle } from "react-native";
 import { Button, ButtonProps } from "@/components/ui/Button/Button";
 import {
   Icon,
@@ -38,10 +38,10 @@ export const IconButton: React.FC<IconButtonProps> = ({
   icon,
   iconVariant,
   iconSize,
-  iconColor,
+  iconColor = "onBackground",
   active = false,
   variant = "ghost",
-  size = "md",
+  size = "lg",
   style,
   accessibilityLabel,
   disabled,

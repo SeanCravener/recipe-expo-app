@@ -23,7 +23,7 @@ export const IngredientsDrawer: React.FC<IngredientsDrawerProps> = ({
     Animated.timing(slideAnim, {
       toValue: isOpen ? 0 : 300,
       duration: 300,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   }, [isOpen]);
 
@@ -31,18 +31,16 @@ export const IngredientsDrawer: React.FC<IngredientsDrawerProps> = ({
 
   return (
     <>
-      {/* Backdrop */}
-      <Pressable onPress={onClose} style={StyleSheet.absoluteFillObject}>
-        <View
-          style={{
-            flex: 1,
+      <Pressable
+        onPress={onClose}
+        style={[
+          StyleSheet.absoluteFillObject,
+          {
+            zIndex: 9998,
             backgroundColor: theme.colors.backdrop,
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-          }}
-        />
-      </Pressable>
+          },
+        ]}
+      />
 
       {/* Drawer */}
       <Animated.View
@@ -54,6 +52,7 @@ export const IngredientsDrawer: React.FC<IngredientsDrawerProps> = ({
           width: 300,
           backgroundColor: theme.colors.surface,
           transform: [{ translateX: slideAnim }],
+          zIndex: 9999,
           ...theme.elevation.level4,
         }}
       >
@@ -63,30 +62,37 @@ export const IngredientsDrawer: React.FC<IngredientsDrawerProps> = ({
           padding="md"
           style={{
             justifyContent: "space-between",
-            alignItems: "center",
-            borderBottomWidth: 1,
-            borderBottomColor: theme.colors.outline,
           }}
         >
-          <Text variant="bodyNormalBold">
-            Ingredients ({ingredients.length})
+          <Text variant="bodyNormalBold" style={{ alignItems: "baseline" }}>
+            Ingredients
           </Text>
-
           <Button
-            variant="ghost"
+            variant="primary"
             size="sm"
             onPress={onClose}
-            style={{ minWidth: 40, minHeight: 40 }}
+            style={{ minWidth: 44, minHeight: 44 }}
           >
             <MaterialIcons
               name="close"
               size={24}
-              color={theme.colors.onSurfaceVariant}
+              color={theme.colors.onPrimary}
             />
           </Button>
         </View>
 
+        {/* Divider (TURN INTO SEPERATE UI COMPONENT LATER) */}
+        <View
+          style={{
+            borderRadius: 8,
+            borderWidth: 1,
+            marginHorizontal: 25,
+            borderColor: "#CFE8E9", // Fix later, change to constant. Pull from theme?
+          }}
+        ></View>
+
         {/* Content */}
+
         <View padding="md" style={{ flex: 1 }}>
           <View style={{ gap: 8 }}>
             {ingredients.map((ingredient, index) => (

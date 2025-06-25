@@ -31,7 +31,7 @@ export type ButtonVariant =
   | "link"
   | "ghost";
 export type ButtonSize = "sm" | "md" | "lg";
-export type CardVariant = "filled" | "outlined" | "elevated";
+export type CardVariant = "filled" | "outlined" | "elevated" | "form";
 export type CheckboxVariant = "default" | "sm" | "lg";
 export type ErrorVariant = "text" | "box";
 export type IconVariant = "sm" | "md" | "lg";

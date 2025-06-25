@@ -27,5 +27,5 @@ export const elevation: Elevation = {
   level3: shadow(4, 0.08, 8, 0, 4),
   level4: shadow(8, 0.09, 16, 0, 8),
   level5: shadow(12, 0.1, 24, 0, 12),
-  card: shadow(4, 0.25, 26, 0, 12),
+  card: shadow(4, 0.25, 8, 0, 4),
 };

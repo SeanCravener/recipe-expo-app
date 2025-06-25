@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from "react";
-import { useWindowDimensions } from "react-native";
 import { useLocalSearchParams, router, Stack } from "expo-router";
 import { useItem } from "@/hooks/useItem";
 import { useAuth } from "@/contexts/auth/AuthContext";
@@ -10,7 +9,7 @@ import {
   StepProgressBar,
   IngredientsDrawer,
 } from "@/components/composite";
-import { Button, Loading, Text, View, Image } from "@/components/ui";
+import { Button, Loading, Text, View, Image, Scroll } from "@/components/ui";
 
 export default function Instructions() {
   const { id } = useLocalSearchParams();
@@ -20,7 +19,6 @@ export default function Instructions() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isRatingModalVisible, setIsRatingModalVisible] = useState(false);
-  const { width } = useWindowDimensions();
 
   const handleExit = useCallback(() => {
     router.back();
@@ -84,57 +82,141 @@ export default function Instructions() {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          headerTitle: item.title,
-          headerStyle: {
-            backgroundColor: theme.colors.surface,
-          },
-          headerTintColor: theme.colors.onSurface,
-          headerRight: () => (
-            <Button
-              variant="ghost"
-              size="sm"
-              onPress={() => setIsDrawerOpen(true)}
-              style={{ marginRight: 8 }}
-            >
-              Ingredients
-            </Button>
-          ),
-        }}
-      />
+      <View style={{ flex: 1 }} backgroundColor="background">
+        <Stack.Screen
+          options={{
+            headerTitle: "",
+            headerTransparent: true,
+            headerStyle: {
+              backgroundColor: "transparent",
+            },
+            headerTintColor: theme.colors.onPrimary,
+            headerRight: () =>
+              !isDrawerOpen ? (
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onPress={() => setIsDrawerOpen(true)}
+                  style={{
+                    marginRight: 8,
+                    minHeight: 44,
+                    minWidth: 44,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  Ingredients
+                </Button>
+              ) : null,
+            headerLeft: () => null,
+          }}
+        />
 
-      <View variant="default" backgroundColor="background">
+        {!isDrawerOpen && (
+          <Button
+            variant="primary"
+            size="sm"
+            onPress={() => setIsDrawerOpen(true)}
+            style={{
+              marginRight: 8,
+              minHeight: 44,
+              minWidth: 44,
+              pointerEvents: "auto",
+            }}
+          >
+            Ingredients
+          </Button>
+        )}
+
         <Image
           source={{ uri: imageToShow }}
           variant="cover"
-          style={{ width, height: 300 }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 300,
+            zIndex: 1,
+          }}
         />
 
-        <View padding="lg" style={{ flex: 1 }}>
-          <Text variant="bodyLargeMedium" style={{ marginBottom: 12 }}>
-            Step {currentStep + 1}
-          </Text>
-
-          <Text
-            variant="bodyNormalRegular"
-            style={{ marginBottom: 16, lineHeight: 24 }}
-          >
-            {currentInstruction.content}
-          </Text>
-
-          <StepProgressBar
-            currentStep={currentStep + 1}
-            totalSteps={item.instructions.length}
-          />
-        </View>
-
+        {/* Content Container - Fixed in place */}
         <View
+          style={{
+            position: "absolute",
+            top: 300 - 40,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 2,
+          }}
+        >
+          <View
+            backgroundColor="background"
+            style={{
+              flex: 1,
+              borderTopLeftRadius: theme.borderRadius.xl,
+              borderTopRightRadius: theme.borderRadius.xl,
+              boxShadow: "0px 0px 15px 2px #41111D",
+              overflow: "hidden", // Ensures content doesn't spill outside rounded corners
+            }}
+          >
+            {/* Scrollable Content Inside Fixed Container */}
+            <Scroll
+              variant="flush"
+              style={{ flex: 1 }}
+              contentContainerStyle={{
+                paddingBottom: 100,
+                flex: 1,
+                paddingHorizontal: theme.spacing.lg,
+                paddingTop: theme.spacing.lg, // Add space for footer
+              }}
+              showsVerticalScrollIndicator={false} // Optional: cleaner look
+            >
+              <Text variant="headerThree">{item.title}</Text>
+              {/* Divider (TURN INTO SEPERATE UI COMPONENT LATER) */}
+              <View
+                style={{
+                  marginVertical: 12,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  marginHorizontal: 6,
+                  borderColor: "#CFE8E9", // Fix later, change to constant. Pull from theme?
+                }}
+              ></View>
+
+              {/* Description */}
+              <Text variant="bodyNormalBold" style={{ marginBottom: 12 }}>
+                Step {currentStep + 1}
+              </Text>
+              <Text
+                variant="bodyNormalRegular"
+                style={{ marginBottom: 16, height: "100%" }}
+              >
+                {currentInstruction.content}
+              </Text>
+              <StepProgressBar
+                currentStep={currentStep + 1}
+                totalSteps={item.instructions.length}
+              />
+            </Scroll>
+          </View>
+        </View>
+        {/* Fixed Footer */}
+        <View
+          variant="row"
           padding="md"
           backgroundColor="surface"
           style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
             borderTopWidth: 1,
-            borderTopColor: theme.colors.outline,
+            borderTopColor: theme.colors.tertiaryContainer,
+            gap: 12,
+            zIndex: 3,
+            boxShadow: "0px 0px 8px 1px #A1D9DD",
           }}
         >
           {isLastStep ? (
@@ -147,9 +229,9 @@ export default function Instructions() {
               Finish Recipe
             </Button>
           ) : (
-            <View variant="row" style={{ gap: 8 }}>
+            <View variant="row" style={{ gap: 8, flex: 1 }}>
               <Button
-                variant="outline"
+                variant="primary"
                 size="md"
                 onPress={handleExit}
                 style={{ flex: 1 }}
@@ -157,7 +239,7 @@ export default function Instructions() {
                 Exit
               </Button>
               <Button
-                variant="outline"
+                variant="primary"
                 size="md"
                 onPress={handlePrevious}
                 disabled={currentStep === 0}
@@ -176,19 +258,20 @@ export default function Instructions() {
             </View>
           )}
         </View>
+
+        <IngredientsDrawer
+          isOpen={isDrawerOpen}
+          onClose={() => setIsDrawerOpen(false)}
+          ingredients={transformedIngredients}
+        />
+
+        <RatingModal
+          visible={isRatingModalVisible}
+          onClose={handleCloseRating}
+          onSubmit={handleRating}
+          itemTitle={item.title}
+        />
       </View>
-
-      <IngredientsDrawer
-        isOpen={isDrawerOpen}
-        onClose={() => setIsDrawerOpen(false)}
-        ingredients={transformedIngredients}
-      />
-
-      <RatingModal
-        visible={isRatingModalVisible}
-        onClose={handleCloseRating}
-        onSubmit={handleRating}
-      />
     </>
   );
 }

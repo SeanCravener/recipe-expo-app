@@ -65,7 +65,7 @@ export const Button: React.FC<ButtonProps> = ({
     ...(compact && {
       paddingVertical: Math.max(
         typeof container.paddingVertical === "number"
-          ? container.paddingVertical * 0.5
+          ? container.paddingVertical * 0.25
           : 8,
         4
       ),

@@ -128,7 +128,10 @@ export const createButtonVariants = (
 
   return {
     primary: build(theme.colors.primary, theme.colors.onPrimary),
-    secondary: build(theme.colors.secondary, theme.colors.onSecondary),
+    secondary: build(
+      theme.colors.secondaryContainer,
+      theme.colors.onSecondaryContainer
+    ),
     danger: build(theme.colors.error, theme.colors.onError),
     outline: buildOutline(theme.colors.primary, theme.colors.primary),
     link: buildLink(theme.colors.primary),

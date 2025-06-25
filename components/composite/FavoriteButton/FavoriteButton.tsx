@@ -1,11 +1,12 @@
 import React from "react";
 import { IconButton } from "@/components/ui";
+import { ButtonSize, ButtonVariant } from "@/theme/types/componentVariants";
 import { useFavorites } from "@/contexts/FavoritesContext";
 
 interface FavoriteButtonProps {
   itemId: string;
-  size?: "sm" | "md" | "lg";
-  variant?: "ghost" | "outline" | "primary";
+  size?: ButtonSize;
+  variant?: ButtonVariant;
   disabled?: boolean;
 }
 
@@ -37,6 +38,7 @@ export const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       accessibilityLabel={
         isFavorited ? "Remove from favorites" : "Add to favorites"
       }
+      compact={true}
     />
   );
 };

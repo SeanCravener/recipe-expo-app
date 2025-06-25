@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Stack } from "expo-router";
 import { View, Text } from "@/components/ui";
 import { useItems } from "@/hooks/useItems";
-import { SearchBar, ItemList } from "@/components/composite";
+import { SearchBar, ItemList, SettingsButton } from "@/components/composite";
 import { useDebouncedCallback } from "use-debounce";
 import { useTheme } from "@/theme/hooks/useTheme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -43,27 +43,30 @@ export default function Search() {
               backgroundColor="surface"
               style={{
                 paddingTop: insets.top, // Dynamic padding based on device
-                paddingBottom: 8,
+                boxShadow: "0px 0px 8px 1px #A1D9DD",
+                borderBottomColor: theme.colors.primaryContainer,
                 borderBottomWidth: 1,
-                borderBottomColor: theme.colors.outline,
               }}
             >
               {/* Title Row */}
               <View
+                variant="row"
                 style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 12,
+                  paddingVertical: 10,
+                  paddingHorizontal: 10,
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                <Text variant="headerThree">{options.title}</Text>
+                <View style={{ width: 40 }} />
+                <Text variant="bodyXLargeBold">{options.title}</Text>
+                <SettingsButton size="lg" />
               </View>
-
               {/* Search Bar Row */}
               <View style={{ paddingHorizontal: 4 }}>
                 <SearchBar
                   onSearch={debouncedSearch}
                   placeholder="Search recipes..."
-                  style={{ margin: 0 }} // Remove SearchBar's default margin
                 />
               </View>
             </View>
