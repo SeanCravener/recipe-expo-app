@@ -7,6 +7,8 @@ import { ColorKey, SpacingKey } from "@/theme/types/keys";
 // Import your SVG icons
 import AddFilled from "@/assets/icons/add-filled.svg";
 import AddUnfilled from "@/assets/icons/add-unfilled.svg";
+import AddImageFilled from "@/assets/icons/add-image-filled.svg";
+import AddImageUnfilled from "@/assets/icons/add-image-unfilled.svg";
 import ArrowBack from "@/assets/icons/arrow-back.svg";
 import AvatarDefaultFilled from "@/assets/icons/avatar-default-filled.svg";
 import AvatarDefaultUnfilled from "@/assets/icons/avatar-default-unfilled.svg";
@@ -29,6 +31,8 @@ import HeartAddUnfilled from "@/assets/icons/heart-add-unfilled.svg";
 import HomeFilled from "@/assets/icons/home-filled.svg";
 import HomeUnfilled from "@/assets/icons/home-unfilled.svg";
 import Menu from "@/assets/icons/menu.svg";
+import MinusFilled from "@/assets/icons/minus-filled.svg";
+import MinusUnfilled from "@/assets/icons/minus-unfilled.svg";
 import ProfileFilled from "@/assets/icons/profile-filled.svg";
 import ProfileUnfilled from "@/assets/icons/profile-unfilled.svg";
 import SearchFilled from "@/assets/icons/search-filled.svg";
@@ -43,10 +47,15 @@ import StarsFilled from "@/assets/icons/stars-filled.svg";
 import StartFilled from "@/assets/icons/start-filled.svg";
 import StartUnfilled from "@/assets/icons/start-unfilled.svg";
 import SunFilled from "@/assets/icons/sun-filled.svg";
+import TrashFilled from "@/assets/icons/trash-filled.svg";
+import TrashUnfilled from "@/assets/icons/trash-unfilled.svg";
+import XFilled from "@/assets/icons/x-filled.svg";
+import XUnfilled from "@/assets/icons/x-unfilled.svg";
 
 // Icon name type based on your SVG files
 export type IconName =
   | "add"
+  | "add-image"
   | "arrow-back"
   | "avatar-default"
   | "bookmark"
@@ -59,6 +68,7 @@ export type IconName =
   | "heart-add"
   | "home"
   | "menu"
+  | "minus"
   | "profile"
   | "search"
   | "settings"
@@ -66,7 +76,9 @@ export type IconName =
   | "star"
   | "stars"
   | "start"
-  | "sun";
+  | "sun"
+  | "trash"
+  | "x";
 
 export type IconVariant = "filled" | "unfilled";
 export type IconSize = "sm" | "md" | "lg" | "xl";
@@ -77,6 +89,7 @@ const iconRegistry: Record<
   Record<IconVariant, React.FC<SvgProps>>
 > = {
   add: { filled: AddFilled, unfilled: AddUnfilled },
+  "add-image": { filled: AddImageFilled, unfilled: AddImageUnfilled },
   "arrow-back": { filled: ArrowBack, unfilled: ArrowBack },
   "avatar-default": {
     filled: AvatarDefaultFilled,
@@ -92,6 +105,7 @@ const iconRegistry: Record<
   "heart-add": { filled: HeartAddFilled, unfilled: HeartAddUnfilled },
   home: { filled: HomeFilled, unfilled: HomeUnfilled },
   menu: { filled: Menu, unfilled: Menu },
+  minus: { filled: MinusFilled, unfilled: MinusUnfilled },
   profile: { filled: ProfileFilled, unfilled: ProfileUnfilled },
   search: { filled: SearchFilled, unfilled: SearchUnfilled },
   settings: { filled: SettingsFilled, unfilled: SettingsUnfilled },
@@ -100,6 +114,8 @@ const iconRegistry: Record<
   stars: { filled: StarsFilled, unfilled: StarsFilled }, // Only filled version exists
   start: { filled: StartFilled, unfilled: StartUnfilled },
   sun: { filled: SunFilled, unfilled: SunFilled }, // Only filled version exists
+  trash: { filled: TrashFilled, unfilled: TrashUnfilled },
+  x: { filled: XFilled, unfilled: XUnfilled },
 };
 
 // Size mapping to pixel values
