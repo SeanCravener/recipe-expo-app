@@ -11,8 +11,8 @@ import {
   ItemFormField,
   ImageUploadField,
   CategorySelect,
-  DynamicList,
-  InstructionFormField,
+  IngredientsList,
+  InstructionsList,
 } from "@/components/composite";
 
 interface EditItemFormProps {
@@ -202,19 +202,13 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
         subtitle={`${ingredientsArray.fields.length}/20 ingredients`}
         style={{ marginBottom: 16 }}
       >
-        <DynamicList
-          control={control}
-          name="ingredients"
-          label="Ingredients"
-          fields={ingredientsArray.fields}
-          append={() => ingredientsArray.append({ value: "" })}
-          remove={ingredientsArray.remove}
-          max={20}
-          placeholder="Cream, 250 g"
+        <IngredientsList
+          ingredients={ingredientsArray.fields}
+          onAdd={(value) => ingredientsArray.append({ value })}
+          onEdit={(index, value) => ingredientsArray.update(index, { value })}
+          onDelete={(index) => ingredientsArray.remove(index)}
           disabled={isFormDisabled}
-          showCounter={false}
-          helpText="Modify ingredients and quantities"
-          addButtonText="Add Ingredient"
+          maxItems={20}
         />
       </FormSection>
 
@@ -224,28 +218,15 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
         subtitle={`${instructionsArray.fields.length}/15 steps`}
         style={{ marginBottom: 24 }}
       >
-        <DynamicList
-          control={control}
-          name="instructions"
-          label="Instructions"
-          fields={instructionsArray.fields}
-          append={() =>
-            instructionsArray.append({ content: "", "image-url": "" })
+        <InstructionsList
+          instructions={instructionsArray.fields}
+          onAdd={(instruction) => instructionsArray.append(instruction)}
+          onEdit={(index, instruction) =>
+            instructionsArray.update(index, instruction)
           }
-          remove={instructionsArray.remove}
-          max={15}
+          onDelete={(index) => instructionsArray.remove(index)}
           disabled={isFormDisabled}
-          showCounter={false}
-          helpText="Update your recipe steps"
-          addButtonText="Add Step"
-          customFieldComponent={InstructionFormField}
-          customFieldProps={{
-            setValue,
-            watch,
-            disabled: isFormDisabled,
-            showImageUpload: true,
-            compact: false,
-          }}
+          maxItems={15}
         />
       </FormSection>
 
