@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { Pressable, StyleProp, ViewStyle } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@/theme/hooks/useTheme";
 import { useImageUpload } from "@/hooks/useImageUpload";
 import { View, Text, Image, Card, Loading, Error, Icon } from "@/components/ui";
@@ -9,7 +10,6 @@ interface ImageUploadFieldProps {
   onChange: (url: string) => void;
   label: string;
   bucket?: "item-images" | "instruction-images";
-  // Enhanced props
   disabled?: boolean;
   required?: boolean;
   helpText?: string;
@@ -18,6 +18,10 @@ interface ImageUploadFieldProps {
   onRemove?: () => void;
   style?: StyleProp<ViewStyle>;
   placeholder?: string;
+  // New props for deferred mode
+  deferUpload?: boolean;
+  onImagePicked?: (uri: string) => void;
+  localImageUri?: string;
 }
 
 export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
@@ -33,41 +37,73 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
   onRemove,
   style,
   placeholder = "Upload Image",
+  deferUpload = false,
+  onImagePicked,
+  localImageUri,
 }) => {
   const { theme } = useTheme();
   const { pickImage, uploadImage, isUploading } = useImageUpload();
   const [error, setError] = useState<string | null>(null);
 
-  // Memoized upload handler
-  const handleUpload = useCallback(async () => {
+  // Determine what to display: local image takes precedence over uploaded URL
+  const displayUri = localImageUri || value;
+
+  // Handle image selection
+  const handleImageSelect = useCallback(async () => {
     if (disabled || isUploading) return;
 
     try {
       setError(null);
       const image = await pickImage();
+
       if (image) {
-        const url = await uploadImage(image.uri, bucket, value);
-        onChange(url);
+        if (deferUpload && onImagePicked) {
+          // In deferred mode, just pass the local URI
+          onImagePicked(image.uri);
+          // Clear the value since we're using local image
+          onChange("");
+        } else {
+          // In immediate mode, upload right away
+          const url = await uploadImage(image.uri, bucket, value);
+          onChange(url);
+        }
       }
     } catch (error) {
-      console.error("Error uploading image:", error);
-      setError("Failed to upload image. Please try again.");
+      console.error("Error handling image:", error);
+      setError("Failed to process image. Please try again.");
     }
-  }, [disabled, isUploading, pickImage, uploadImage, bucket, value, onChange]);
+  }, [
+    disabled,
+    isUploading,
+    pickImage,
+    uploadImage,
+    bucket,
+    value,
+    onChange,
+    deferUpload,
+    onImagePicked,
+  ]);
 
-  // Memoized remove handler
+  // Handle remove
   const handleRemove = useCallback(() => {
     if (disabled) return;
 
+    // Clear local image if in deferred mode
+    if (deferUpload && onImagePicked) {
+      onImagePicked("");
+    }
+
+    // Clear the value
+    onChange("");
+
+    // Call custom remove handler if provided
     if (onRemove) {
       onRemove();
-    } else {
-      onChange("");
     }
-    setError(null);
-  }, [disabled, onRemove, onChange]);
 
-  // Loading state check
+    setError(null);
+  }, [disabled, onChange, onRemove, deferUpload, onImagePicked]);
+
   const isDisabled = disabled || isUploading;
 
   return (
@@ -79,16 +115,15 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
             {label}
             {required && (
               <Text variant="bodyNormalBold" color="error">
-                {" "}
                 *
               </Text>
             )}
           </Text>
 
-          {/* Remove button - only show if image exists and removal is allowed */}
-          {value && showRemoveButton && (
+          {/* Remove button */}
+          {displayUri && showRemoveButton && (
             <Icon
-              name="edit-three" // Use as close/remove icon
+              name="edit-three"
               variant="unfilled"
               size="sm"
               color={isDisabled ? "onSurfaceVariant" : "error"}
@@ -112,13 +147,13 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
 
       {/* Upload area */}
       <Pressable
-        onPress={handleUpload}
+        onPress={handleImageSelect}
         disabled={isDisabled}
         style={({ pressed }) => ({
           opacity: isDisabled ? 0.6 : pressed ? 0.8 : 1,
         })}
         accessibilityRole="button"
-        accessibilityLabel={value ? "Change image" : "Upload image"}
+        accessibilityLabel={displayUri ? "Change image" : "Select image"}
         accessibilityState={{ disabled: isDisabled }}
       >
         <Card
@@ -135,18 +170,18 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
               : theme.colors.outline,
           }}
         >
-          {value && !isUploading ? (
-            // Show uploaded image
+          {displayUri && !isUploading ? (
+            // Show image preview
             <View
               style={{ position: "relative", width: "100%", height: "100%" }}
             >
               <Image
-                source={{ uri: value }}
+                source={{ uri: displayUri }}
                 variant="cover"
                 style={{ width: "100%", height: "100%" }}
               />
 
-              {/* Overlay with change icon */}
+              {/* Change icon overlay */}
               <View
                 style={{
                   position: "absolute",
@@ -165,9 +200,29 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
                   color="onSurface"
                 />
               </View>
+
+              {/* Show indicator for local images */}
+              {deferUpload && localImageUri && !value && (
+                <View
+                  style={{
+                    position: "absolute",
+                    bottom: theme.spacing.sm,
+                    left: theme.spacing.sm,
+                    backgroundColor: theme.colors.primaryContainer,
+                    borderRadius: theme.borderRadius.sm,
+                    paddingHorizontal: theme.spacing.sm,
+                    paddingVertical: theme.spacing.xs,
+                    ...theme.elevation.level2,
+                  }}
+                >
+                  <Text variant="bodyXSmallBold" color="onPrimaryContainer">
+                    Ready to upload
+                  </Text>
+                </View>
+              )}
             </View>
           ) : (
-            // Show upload placeholder
+            // Show placeholder
             <View
               variant="centered"
               backgroundColor="surfaceVariant"
@@ -187,7 +242,7 @@ export const ImageUploadField: React.FC<ImageUploadFieldProps> = ({
               ) : (
                 <View variant="centered">
                   <Icon
-                    name="add"
+                    name="add-image"
                     variant="unfilled"
                     size="lg"
                     color="onSurfaceVariant"

@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { ItemFormData } from "@/types/item";
-import { cleanupItemImages } from "@/lib/storage";
 
 export function useAddItem(sessionUserId: string | undefined) {
   const queryClient = useQueryClient();
@@ -10,15 +9,8 @@ export function useAddItem(sessionUserId: string | undefined) {
     mutationFn: async (data: ItemFormData) => {
       if (!sessionUserId) throw new Error("Must be logged in to add items");
 
-      // Gather all step and main recipe images actually provided
-      const allImages: string[] = [
-        data.main_image,
-        ...data.instructions
-          .map((step) => step["image-url"])
-          .filter(
-            (url): url is string => typeof url === "string" && url.length > 0
-          ),
-      ];
+      // At this point, all images should already be uploaded
+      // The form handles the upload process before calling this mutation
 
       const { data: item, error } = await supabase
         .from("items")
@@ -30,8 +22,8 @@ export function useAddItem(sessionUserId: string | undefined) {
         .single();
 
       if (error) {
-        // On error, clean up uploaded images
-        await cleanupItemImages(allImages, []); // Remove all images uploaded in this form
+        // Don't try to cleanup images here - the form component
+        // should handle cleanup if needed since it manages the upload process
         throw error;
       }
 

@@ -45,7 +45,6 @@ export const ItemFormField = <T extends FieldValues>({
         fieldState: { error },
       }) => (
         <View style={{ marginBottom: 16 }}>
-          {" "}
           {/* Consistent spacing */}
           {/* Label */}
           <View variant="row" style={{ marginBottom: 6 }}>
@@ -53,7 +52,6 @@ export const ItemFormField = <T extends FieldValues>({
               {label}
               {required && (
                 <Text variant="bodyNormalBold" color="error">
-                  {" "}
                   *
                 </Text>
               )}

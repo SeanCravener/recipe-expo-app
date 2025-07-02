@@ -3,65 +3,46 @@ import { supabase } from "@/lib/supabase";
 import { ItemFormData } from "@/types/item";
 import { router } from "expo-router";
 import { Alert } from "react-native";
-import { cleanupItemImages } from "@/lib/storage";
+import { deleteStorageFile } from "@/lib/storage";
+
+interface EditItemData extends ItemFormData {
+  // Optional array of old image URLs that need to be cleaned up
+  imagesToCleanup?: string[];
+}
 
 export function useEditItem(itemId: string) {
   const queryClient = useQueryClient();
 
   const editMutation = useMutation({
-    mutationFn: async (data: ItemFormData) => {
-      // Get the current item data for image comparison
-      const { data: currentItem } = await supabase
-        .from("items")
-        .select("main_image, instructions")
-        .eq("id", itemId)
-        .single();
-
-      if (!currentItem) throw new Error("Item not found");
-
-      // Collect all old images
-      interface Instruction {
-        "image-url"?: string;
-      }
-
-      const oldImages = [
-        currentItem.main_image,
-        ...((currentItem.instructions as Instruction[]) ?? [])
-          .map((instruction: Instruction) => instruction["image-url"])
-          .filter((url): url is string => typeof url === "string"),
-      ];
-
-      // Collect all new images
-      const newImages = [
-        data.main_image,
-        ...data.instructions
-          .map((instruction) => instruction["image-url"])
-          .filter((url): url is string => typeof url === "string"),
-      ];
+    mutationFn: async (data: EditItemData) => {
+      const { imagesToCleanup, ...itemData } = data;
 
       // Update item data
       const { error: itemError } = await supabase
         .from("items")
         .update({
-          title: data.title,
-          description: data.description,
-          main_image: data.main_image,
-          category_id: data.category_id,
-          ingredients: data.ingredients,
-          instructions: data.instructions,
+          title: itemData.title,
+          description: itemData.description,
+          main_image: itemData.main_image,
+          category_id: itemData.category_id,
+          ingredients: itemData.ingredients,
+          instructions: itemData.instructions,
           updated_at: new Date().toISOString(),
         })
         .eq("id", itemId);
 
       if (itemError) throw itemError;
 
-      // Clean up unused images
-      await cleanupItemImages(oldImages, newImages);
+      // Clean up old images that were replaced
+      // The form component determines which images need cleanup
+      if (imagesToCleanup && imagesToCleanup.length > 0) {
+        await Promise.all(imagesToCleanup.map((url) => deleteStorageFile(url)));
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["item", itemId] });
-      Alert.alert("Success", "Item updated successfully!", [
+      Alert.alert("Success", "Recipe updated successfully!", [
         {
           text: "OK",
           onPress: () => router.back(),
@@ -86,14 +67,7 @@ export function useEditItem(itemId: string) {
         .single();
 
       if (item) {
-        const images = [
-          item.main_image,
-          ...(item.instructions ?? [])
-            .map((instruction: any) => instruction["image-url"])
-            .filter(Boolean),
-        ];
-
-        // Delete the item
+        // Delete the item first
         const { error } = await supabase
           .from("items")
           .delete()
@@ -101,8 +75,18 @@ export function useEditItem(itemId: string) {
 
         if (error) throw error;
 
-        // Clean up all images
-        await cleanupItemImages(images, []);
+        // Then clean up all images
+        const images = [
+          item.main_image,
+          ...(item.instructions ?? [])
+            .map((instruction: any) => instruction["image-url"])
+            .filter(
+              (url: any): url is string =>
+                typeof url === "string" && url.length > 0
+            ),
+        ];
+
+        await Promise.all(images.map((url) => deleteStorageFile(url)));
       }
     },
     onSuccess: () => {

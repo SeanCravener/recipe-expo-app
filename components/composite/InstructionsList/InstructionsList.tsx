@@ -16,6 +16,10 @@ interface InstructionsListProps {
   onDelete: (index: number) => void;
   disabled?: boolean;
   maxItems?: number;
+  // New props for deferred upload
+  deferUpload?: boolean;
+  onInstructionImagePicked?: (index: number, uri: string) => void;
+  localImageUris?: { [key: number]: string };
 }
 
 export const InstructionsList: React.FC<InstructionsListProps> = ({
@@ -25,18 +29,24 @@ export const InstructionsList: React.FC<InstructionsListProps> = ({
   onDelete,
   disabled = false,
   maxItems = 15,
+  deferUpload = false,
+  onInstructionImagePicked,
+  localImageUris = {},
 }) => {
   const { theme } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [tempLocalImageUri, setTempLocalImageUri] = useState<string>("");
 
   const handleAddClick = () => {
     setEditingIndex(null);
+    setTempLocalImageUri("");
     setModalVisible(true);
   };
 
   const handleEditClick = (index: number) => {
     setEditingIndex(index);
+    setTempLocalImageUri(localImageUris[index] || "");
     setModalVisible(true);
   };
 
@@ -62,11 +72,25 @@ export const InstructionsList: React.FC<InstructionsListProps> = ({
   const handleSave = (instruction: Instruction) => {
     if (editingIndex !== null) {
       onEdit(editingIndex, instruction);
+      // Update local image if changed
+      if (
+        deferUpload &&
+        onInstructionImagePicked &&
+        tempLocalImageUri !== localImageUris[editingIndex]
+      ) {
+        onInstructionImagePicked(editingIndex, tempLocalImageUri);
+      }
     } else {
       onAdd(instruction);
+      // Set local image for new instruction
+      if (deferUpload && onInstructionImagePicked && tempLocalImageUri) {
+        const newIndex = instructions.length;
+        onInstructionImagePicked(newIndex, tempLocalImageUri);
+      }
     }
     setModalVisible(false);
     setEditingIndex(null);
+    setTempLocalImageUri("");
   };
 
   const handleDelete = () => {
@@ -81,8 +105,9 @@ export const InstructionsList: React.FC<InstructionsListProps> = ({
 
   const renderInstruction = (instruction: Instruction, index: number) => {
     const stepNumber = index + 1;
-    const hasImage =
-      instruction["image-url"] && instruction["image-url"].length > 0;
+    // Use local image if available, otherwise use the URL
+    const displayImageUri = localImageUris[index] || instruction["image-url"];
+    const hasImage = displayImageUri && displayImageUri.length > 0;
 
     return (
       <View
@@ -132,7 +157,7 @@ export const InstructionsList: React.FC<InstructionsListProps> = ({
               >
                 {hasImage ? (
                   <Image
-                    source={{ uri: instruction["image-url"] }}
+                    source={{ uri: displayImageUri }}
                     style={{ width: "100%", height: "100%" }}
                     resizeMode="cover"
                   />
@@ -256,7 +281,10 @@ export const InstructionsList: React.FC<InstructionsListProps> = ({
       {/* Modal */}
       <InstructionModal
         visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false);
+          setTempLocalImageUri("");
+        }}
         onSave={handleSave}
         onDelete={editingIndex !== null ? handleDelete : undefined}
         initialValue={
@@ -268,6 +296,9 @@ export const InstructionsList: React.FC<InstructionsListProps> = ({
         stepNumber={
           editingIndex !== null ? editingIndex + 1 : instructions.length + 1
         }
+        deferUpload={deferUpload}
+        onImagePicked={setTempLocalImageUri}
+        localImageUri={tempLocalImageUri}
       />
     </>
   );

@@ -4,8 +4,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { itemFormSchema } from "@/lib/schemas";
 import { ItemFormData } from "@/types/item";
 import { useAddItem } from "@/hooks/useAddItem";
+import { useDeferredFormImages } from "@/hooks/useDeferredFormImages";
+import { supabase } from "@/lib/supabase";
 import { useTheme } from "@/theme/hooks/useTheme";
-import { View, Scroll, Button, Error, Text } from "@/components/ui";
+import {
+  View,
+  Scroll,
+  Button,
+  Error,
+  Text,
+  Loading,
+  Modal,
+} from "@/components/ui";
 import {
   FormSection,
   ItemFormField,
@@ -14,6 +24,7 @@ import {
   IngredientsList,
   InstructionsList,
 } from "@/components/composite";
+import { deleteStorageFile } from "@/lib/storage";
 
 interface AddItemFormProps {
   userId: string;
@@ -24,9 +35,39 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
   userId,
   onSuccess,
 }) => {
+  const addItemMutation = useAddItem(userId);
+  const { theme } = useTheme();
+
+  // Deferred image handling
+  const {
+    setLocalImage,
+    clearLocalImage,
+    clearAllLocalImages,
+    uploadAllImages,
+    isUploading,
+    getLocalImageUri,
+    hasLocalImage,
+  } = useDeferredFormImages();
+
+  // Custom resolver that handles deferred images
+  // I don't really like this, but it allows me to bypass an issue I was having with validation and getting new items added to the database.
+  const customResolver = React.useCallback(
+    async (data: any, context: any, options: any) => {
+      // If we have a local image but no URL, temporarily satisfy validation
+      const dataToValidate = { ...data };
+      if (hasLocalImage("main_image") && !dataToValidate.main_image) {
+        dataToValidate.main_image = "will-be-uploaded";
+      }
+
+      // Run the normal validation
+      return zodResolver(itemFormSchema)(dataToValidate, context, options);
+    },
+    [hasLocalImage]
+  );
+
   const { control, handleSubmit, setValue, watch, reset, formState } =
     useForm<ItemFormData>({
-      resolver: zodResolver(itemFormSchema),
+      resolver: customResolver,
       defaultValues: {
         title: "",
         description: "",
@@ -47,31 +88,111 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
     name: "instructions",
   });
 
-  const addItemMutation = useAddItem(userId);
-  const { theme } = useTheme();
+  const onSubmit = async (data: ItemFormData) => {
+    console.log("Form submitted", data);
 
-  // Watch for form data to show progress
-  const watchedData = watch();
-  const hasTitle = watchedData.title?.length > 0;
-  const hasImage = watchedData.main_image?.length > 0;
-  const hasIngredients = watchedData.ingredients?.length > 0;
-  const hasInstructions = watchedData.instructions?.some(
-    (inst) => inst.content?.length > 0
-  );
+    let uploadedUrls: string[] = [];
 
-  const onSubmit = (data: ItemFormData) => {
-    addItemMutation.mutate(data, {
-      onSuccess: (item) => {
-        reset();
-        onSuccess(item);
-      },
-      onError: (error) => {
-        console.error("Add item error:", error);
-      },
-    });
+    try {
+      // First, upload all local images
+      const uploadResults = await uploadAllImages();
+      console.log("Upload results:", uploadResults);
+
+      // Track uploaded URLs for potential cleanup
+      uploadedUrls = uploadResults.map((result) => result.url);
+
+      // Create a clean copy of the data
+      let finalData = { ...data };
+
+      // Update form data with uploaded URLs
+      uploadResults.forEach(({ fieldPath, url }) => {
+        if (fieldPath === "main_image") {
+          finalData.main_image = url;
+        } else if (fieldPath.startsWith("instructions.")) {
+          const match = fieldPath.match(/instructions\.(\d+)\.image-url/);
+          if (match) {
+            const index = parseInt(match[1]);
+            if (finalData.instructions[index]) {
+              finalData.instructions[index]["image-url"] = url;
+            }
+          }
+        }
+      });
+
+      // Ensure we don't have any placeholder values
+      if (finalData.main_image === "pending" || finalData.main_image === "") {
+        if (hasLocalImage("main_image")) {
+          console.log("Main image failed to upload");
+        }
+      }
+
+      console.log("Final data to submit:", finalData);
+
+      // Submit with uploaded URLs
+      addItemMutation.mutate(finalData, {
+        onSuccess: (item) => {
+          reset();
+          clearAllLocalImages();
+          onSuccess(item);
+        },
+        onError: async (error) => {
+          console.error("Add item error:", error);
+          // Clean up uploaded images if submission fails
+          if (uploadedUrls.length > 0) {
+            console.log("Cleaning up uploaded images after failure");
+            for (const url of uploadedUrls) {
+              try {
+                const path = url.split("/").pop();
+                if (path) {
+                  const bucket = url.includes("instruction-images")
+                    ? "instruction-images"
+                    : "item-images";
+                  await supabase.storage.from(bucket).remove([path]);
+                }
+              } catch (cleanupError) {
+                console.error("Error cleaning up image:", cleanupError);
+              }
+            }
+          }
+        },
+      });
+    } catch (error) {
+      console.error("Form submission error:", error);
+      // Clean up any uploaded images if we failed before submission
+      if (uploadedUrls.length > 0) {
+        await Promise.all(uploadedUrls.map((url) => deleteStorageFile(url)));
+        await Promise.all(uploadedUrls.map((url) => deleteStorageFile(url)));
+      }
+    }
   };
 
-  const isFormDisabled = addItemMutation.isPending;
+  const isFormDisabled = addItemMutation.isPending || isUploading;
+
+  // Handle main image selection
+  const handleMainImagePicked = (uri: string) => {
+    if (uri) {
+      setLocalImage("main_image", uri, "item-images");
+      // Don't set a value in the form, let the custom resolver handle it
+    } else {
+      clearLocalImage("main_image");
+    }
+  };
+
+  // Debug form state
+  React.useEffect(() => {
+    console.log("Form validation state:", {
+      isValid: formState.isValid,
+      errors: formState.errors,
+      values: {
+        title: watch("title"),
+        description: watch("description"),
+        main_image: watch("main_image"),
+        category_id: watch("category_id"),
+        ingredientsCount: watch("ingredients")?.length,
+        instructionsCount: watch("instructions")?.length,
+      },
+    });
+  }, [formState.isValid, formState.errors, watch]);
 
   return (
     <Scroll
@@ -79,7 +200,7 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
       style={{ flex: 1 }}
       contentContainerStyle={{
         padding: 16,
-        paddingBottom: 100, // Extra space for bottom button
+        paddingBottom: 100,
       }}
       showsVerticalScrollIndicator={false}
     >
@@ -95,6 +216,9 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
           helpText="Add an appetizing photo of your finished recipe"
           height={240}
           placeholder="Add Recipe Photo"
+          deferUpload={true}
+          onImagePicked={handleMainImagePicked}
+          localImageUri={getLocalImageUri("main_image")}
         />
       </FormSection>
 
@@ -158,9 +282,47 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
           onEdit={(index, instruction) =>
             instructionsArray.update(index, instruction)
           }
-          onDelete={(index) => instructionsArray.remove(index)}
+          onDelete={(index) => {
+            // Clear local image for this instruction if it exists
+            clearLocalImage(`instructions.${index}.image-url`);
+            instructionsArray.remove(index);
+
+            // Update field paths for remaining instruction images
+            const totalInstructions = instructionsArray.fields.length;
+            for (let i = index + 1; i < totalInstructions; i++) {
+              const oldPath = `instructions.${i}.image-url`;
+              const newPath = `instructions.${i - 1}.image-url`;
+              const uri = getLocalImageUri(oldPath);
+              if (uri) {
+                clearLocalImage(oldPath);
+                setLocalImage(newPath, uri, "instruction-images");
+              }
+            }
+          }}
           disabled={isFormDisabled}
           maxItems={15}
+          deferUpload={true}
+          onInstructionImagePicked={(index, uri) => {
+            if (uri) {
+              setLocalImage(
+                `instructions.${index}.image-url`,
+                uri,
+                "instruction-images"
+              );
+            } else {
+              clearLocalImage(`instructions.${index}.image-url`);
+            }
+          }}
+          localImageUris={(() => {
+            const uris: { [key: number]: string } = {};
+            instructionsArray.fields.forEach((_, index) => {
+              const uri = getLocalImageUri(`instructions.${index}.image-url`);
+              if (uri) {
+                uris[index] = uri;
+              }
+            });
+            return uris;
+          })()}
         />
       </FormSection>
 
@@ -176,7 +338,10 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
         <Button
           variant="outline"
           size="lg"
-          onPress={() => reset()}
+          onPress={() => {
+            reset();
+            clearAllLocalImages();
+          }}
           disabled={isFormDisabled}
           style={{ flex: 1 }}
         >
@@ -195,6 +360,29 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
         </Button>
       </View>
 
+      {/* Upload Progress Modal */}
+      {isUploading && (
+        <Modal
+          visible={isUploading}
+          onClose={() => {}}
+          contentStyle={{
+            width: "80%",
+            maxWidth: 300,
+            padding: theme.spacing.lg,
+          }}
+        >
+          <View variant="centered">
+            <Loading variant="spinner" />
+            <Text
+              variant="bodyNormalMedium"
+              style={{ marginTop: theme.spacing.md }}
+            >
+              Uploading Images...
+            </Text>
+          </View>
+        </Modal>
+      )}
+
       {/* Error Display */}
       {addItemMutation.error && (
         <View style={{ marginTop: 8 }}>
@@ -206,84 +394,6 @@ export const AddItemForm: React.FC<AddItemFormProps> = ({
                 : "Failed to add recipe. Please try again."
             }
           />
-        </View>
-      )}
-
-      {/* Form Progress Indicator (Optional) */}
-      {!addItemMutation.isPending && (
-        <View
-          style={{
-            marginTop: 16,
-            padding: 12,
-            backgroundColor: theme.colors.surfaceVariant,
-            borderRadius: theme.borderRadius.md,
-          }}
-        >
-          <Text
-            variant="bodySmallMedium"
-            color="onSurfaceVariant"
-            style={{ marginBottom: 8 }}
-          >
-            Progress
-          </Text>
-          <View variant="row" style={{ flexWrap: "wrap", gap: 8 }}>
-            {hasTitle && (
-              <View
-                style={{
-                  backgroundColor: theme.colors.primary,
-                  paddingHorizontal: theme.spacing.sm,
-                  paddingVertical: theme.spacing.xs,
-                  borderRadius: theme.borderRadius.full,
-                }}
-              >
-                <Text variant="bodyXSmallRegular" color="onPrimary">
-                  ✓ Title
-                </Text>
-              </View>
-            )}
-            {hasImage && (
-              <View
-                style={{
-                  backgroundColor: theme.colors.primary,
-                  paddingHorizontal: theme.spacing.sm,
-                  paddingVertical: theme.spacing.xs,
-                  borderRadius: theme.borderRadius.full,
-                }}
-              >
-                <Text variant="bodyXSmallRegular" color="onPrimary">
-                  ✓ Photo
-                </Text>
-              </View>
-            )}
-            {hasIngredients && (
-              <View
-                style={{
-                  backgroundColor: theme.colors.primary,
-                  paddingHorizontal: theme.spacing.sm,
-                  paddingVertical: theme.spacing.xs,
-                  borderRadius: theme.borderRadius.full,
-                }}
-              >
-                <Text variant="bodyXSmallRegular" color="onPrimary">
-                  ✓ Ingredients
-                </Text>
-              </View>
-            )}
-            {hasInstructions && (
-              <View
-                style={{
-                  backgroundColor: theme.colors.primary,
-                  paddingHorizontal: theme.spacing.sm,
-                  paddingVertical: theme.spacing.xs,
-                  borderRadius: theme.borderRadius.full,
-                }}
-              >
-                <Text variant="bodyXSmallRegular" color="onPrimary">
-                  ✓ Steps
-                </Text>
-              </View>
-            )}
-          </View>
         </View>
       )}
     </Scroll>

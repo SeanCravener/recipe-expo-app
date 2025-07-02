@@ -4,8 +4,17 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { itemFormSchema } from "@/lib/schemas";
 import { ItemFormData } from "@/types/item";
+import { useDeferredFormImages } from "@/hooks/useDeferredFormImages";
 import { useTheme } from "@/theme/hooks/useTheme";
-import { View, Scroll, Button, Error, Text } from "@/components/ui";
+import {
+  View,
+  Scroll,
+  Button,
+  Error,
+  Text,
+  Loading,
+  Modal,
+} from "@/components/ui";
 import {
   FormSection,
   ItemFormField,
@@ -17,7 +26,7 @@ import {
 
 interface EditItemFormProps {
   initialValues: ItemFormData;
-  onSubmit: (data: ItemFormData) => void;
+  onSubmit: (data: ItemFormData & { imagesToCleanup?: string[] }) => void;
   onDelete: () => void;
   isSaving: boolean;
   isDeleting: boolean;
@@ -33,9 +42,36 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
   error,
 }) => {
   const { theme } = useTheme();
+
+  // Deferred image handling
+  const {
+    setLocalImage,
+    clearLocalImage,
+    clearAllLocalImages,
+    uploadAllImages,
+    isUploading,
+    getLocalImageUri,
+    hasLocalImage,
+  } = useDeferredFormImages();
+
+  // Custom resolver that handles deferred images
+  const customResolver = React.useCallback(
+    async (data: any, context: any, options: any) => {
+      // If we have a local image but no URL, temporarily satisfy validation
+      const dataToValidate = { ...data };
+      if (hasLocalImage("main_image") && !dataToValidate.main_image) {
+        dataToValidate.main_image = "will-be-uploaded";
+      }
+
+      // Run the normal validation
+      return zodResolver(itemFormSchema)(dataToValidate, context, options);
+    },
+    [hasLocalImage]
+  );
+
   const { control, handleSubmit, setValue, watch, reset, formState } =
     useForm<ItemFormData>({
-      resolver: zodResolver(itemFormSchema),
+      resolver: customResolver,
       defaultValues: initialValues,
     });
 
@@ -52,13 +88,75 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
   // Reset form when initial values change
   useEffect(() => {
     reset(initialValues);
-  }, [initialValues, reset]);
+    clearAllLocalImages();
+  }, [initialValues, reset, clearAllLocalImages]);
 
-  // Watch for form data to show changes indicator
-  const watchedData = watch();
-  const hasChanges = React.useMemo(() => {
-    return JSON.stringify(watchedData) !== JSON.stringify(initialValues);
-  }, [watchedData, initialValues]);
+  const handleFormSubmit = async (data: ItemFormData) => {
+    console.log("Form submitted", data);
+
+    try {
+      // Track images that need cleanup
+      const imagesToCleanup: string[] = [];
+
+      // First, upload all local images
+      const uploadResults = await uploadAllImages();
+      console.log("Upload results:", uploadResults);
+
+      // Create a clean copy of the data
+      let finalData = { ...data };
+
+      // Update form data with uploaded URLs and track replaced images
+      uploadResults.forEach(({ fieldPath, url }) => {
+        if (fieldPath === "main_image") {
+          // If replacing main image, mark old one for cleanup
+          if (initialValues.main_image && initialValues.main_image !== url) {
+            imagesToCleanup.push(initialValues.main_image);
+          }
+          finalData.main_image = url;
+        } else if (fieldPath.startsWith("instructions.")) {
+          const match = fieldPath.match(/instructions\.(\d+)\.image-url/);
+          if (match) {
+            const index = parseInt(match[1]);
+            if (finalData.instructions[index]) {
+              // If replacing instruction image, mark old one for cleanup
+              const oldUrl = initialValues.instructions[index]?.["image-url"];
+              if (oldUrl && oldUrl !== url) {
+                imagesToCleanup.push(oldUrl);
+              }
+              finalData.instructions[index]["image-url"] = url;
+            }
+          }
+        }
+      });
+
+      // Also check for removed instruction images
+      initialValues.instructions.forEach((instruction, index) => {
+        if (instruction["image-url"]) {
+          // If this instruction still exists in final data
+          if (finalData.instructions[index]) {
+            // If the image was removed (not replaced)
+            if (
+              !finalData.instructions[index]["image-url"] &&
+              !hasLocalImage(`instructions.${index}.image-url`)
+            ) {
+              imagesToCleanup.push(instruction["image-url"]);
+            }
+          } else {
+            // Instruction was deleted, cleanup its image
+            imagesToCleanup.push(instruction["image-url"]);
+          }
+        }
+      });
+
+      console.log("Final data to submit:", finalData);
+      console.log("Images to cleanup:", imagesToCleanup);
+
+      // Submit with uploaded URLs and cleanup list
+      onSubmit({ ...finalData, imagesToCleanup });
+    } catch (error) {
+      console.error("Form submission error:", error);
+    }
+  };
 
   const handleDeleteConfirm = () => {
     Alert.alert(
@@ -79,24 +177,24 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
     );
   };
 
-  const handleDiscardChanges = () => {
-    if (hasChanges) {
-      Alert.alert(
-        "Discard Changes",
-        "Are you sure you want to discard your changes? All unsaved modifications will be lost.",
-        [
-          { text: "Keep Editing", style: "cancel" },
-          {
-            text: "Discard",
-            style: "destructive",
-            onPress: () => reset(initialValues),
-          },
-        ]
-      );
+  const isFormDisabled = isSaving || isDeleting || isUploading;
+
+  // Handle main image selection
+  const handleMainImagePicked = (uri: string) => {
+    if (uri) {
+      setLocalImage("main_image", uri, "item-images");
+      // Clear the form value to indicate change
+      setValue("main_image", "");
+    } else {
+      clearLocalImage("main_image");
+      // Restore original value
+      setValue("main_image", initialValues.main_image);
     }
   };
 
-  const isFormDisabled = isSaving || isDeleting;
+  // Check if main image is valid (either original URL or local image)
+  const mainImageValue = watch("main_image");
+  const hasValidMainImage = mainImageValue || hasLocalImage("main_image");
 
   return (
     <Scroll
@@ -104,51 +202,10 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
       style={{ flex: 1 }}
       contentContainerStyle={{
         padding: 16,
-        paddingBottom: 120, // Extra space for bottom buttons
+        paddingBottom: 120,
       }}
       showsVerticalScrollIndicator={false}
     >
-      {/* Changes Indicator */}
-      {hasChanges && !isFormDisabled && (
-        <View
-          style={{
-            backgroundColor: theme.colors.primaryContainer,
-            padding: theme.spacing.md,
-            borderRadius: theme.borderRadius.md,
-            marginBottom: theme.spacing.md,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <Text variant="bodySmallMedium" color="onPrimaryContainer">
-              You have unsaved changes
-            </Text>
-            <Text
-              variant="bodyXSmallRegular"
-              color="onPrimaryContainer"
-              style={{ opacity: 0.8 }}
-            >
-              Don't forget to save your modifications
-            </Text>
-          </View>
-          <Button
-            variant="outline"
-            size="sm"
-            onPress={handleDiscardChanges}
-            style={{
-              borderColor: theme.colors.onPrimaryContainer,
-              minWidth: 80,
-            }}
-          >
-            <Text variant="bodySmallMedium" color="onPrimaryContainer">
-              Discard
-            </Text>
-          </Button>
-        </View>
-      )}
-
       {/* Main Image Section */}
       <FormSection style={{ marginBottom: 16 }}>
         <ImageUploadField
@@ -161,6 +218,9 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
           helpText="Update your recipe photo"
           height={240}
           placeholder="Change Recipe Photo"
+          deferUpload={true}
+          onImagePicked={handleMainImagePicked}
+          localImageUri={getLocalImageUri("main_image")}
         />
       </FormSection>
 
@@ -224,9 +284,47 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
           onEdit={(index, instruction) =>
             instructionsArray.update(index, instruction)
           }
-          onDelete={(index) => instructionsArray.remove(index)}
+          onDelete={(index) => {
+            // Clear local image for this instruction if it exists
+            clearLocalImage(`instructions.${index}.image-url`);
+            instructionsArray.remove(index);
+
+            // Update field paths for remaining instruction images
+            const totalInstructions = instructionsArray.fields.length;
+            for (let i = index + 1; i < totalInstructions; i++) {
+              const oldPath = `instructions.${i}.image-url`;
+              const newPath = `instructions.${i - 1}.image-url`;
+              const uri = getLocalImageUri(oldPath);
+              if (uri) {
+                clearLocalImage(oldPath);
+                setLocalImage(newPath, uri, "instruction-images");
+              }
+            }
+          }}
           disabled={isFormDisabled}
           maxItems={15}
+          deferUpload={true}
+          onInstructionImagePicked={(index, uri) => {
+            if (uri) {
+              setLocalImage(
+                `instructions.${index}.image-url`,
+                uri,
+                "instruction-images"
+              );
+            } else {
+              clearLocalImage(`instructions.${index}.image-url`);
+            }
+          }}
+          localImageUris={(() => {
+            const uris: { [key: number]: string } = {};
+            instructionsArray.fields.forEach((_, index) => {
+              const uri = getLocalImageUri(`instructions.${index}.image-url`);
+              if (uri) {
+                uris[index] = uri;
+              }
+            });
+            return uris;
+          })()}
         />
       </FormSection>
 
@@ -265,77 +363,41 @@ export const EditItemForm: React.FC<EditItemFormProps> = ({
         <Button
           variant="primary"
           size="lg"
-          onPress={handleSubmit(onSubmit)}
-          disabled={isFormDisabled || (!hasChanges && formState.isValid)}
-          loading={isSaving}
+          onPress={handleSubmit(handleFormSubmit)}
+          disabled={isFormDisabled || !formState.isValid}
+          loading={isSaving || isUploading}
           style={{ flex: 1 }}
         >
-          {isSaving ? "Saving..." : "Save Changes"}
+          {isSaving
+            ? "Saving..."
+            : isUploading
+            ? "Uploading..."
+            : "Save Changes"}
         </Button>
       </View>
 
-      {/* Form Status Indicator */}
-      {!isFormDisabled && (
-        <View
-          style={{
-            marginTop: 8,
-            padding: theme.spacing.md,
-            backgroundColor: theme.colors.surfaceVariant,
-            borderRadius: theme.borderRadius.md,
+      {/* Upload Progress Modal */}
+      {isUploading && (
+        <Modal
+          visible={isUploading}
+          onClose={() => {}}
+          contentStyle={{
+            width: "80%",
+            maxWidth: 300,
+            padding: theme.spacing.lg,
           }}
         >
-          <View
-            variant="row"
-            style={{ justifyContent: "space-between", alignItems: "center" }}
-          >
-            <View>
-              <Text variant="bodySmallMedium" color="onSurfaceVariant">
-                Form Status
-              </Text>
-              <Text variant="bodyXSmallRegular" color="onSurfaceVariant">
-                {hasChanges
-                  ? "Changes detected - ready to save"
-                  : "No changes made"}
-              </Text>
-            </View>
-
-            <View
-              style={{
-                backgroundColor: hasChanges
-                  ? theme.colors.tertiary
-                  : theme.colors.outline,
-                paddingHorizontal: theme.spacing.sm,
-                paddingVertical: theme.spacing.xs,
-                borderRadius: theme.borderRadius.full,
-              }}
+          <View variant="centered">
+            <Loading variant="spinner" />
+            <Text
+              variant="bodyNormalMedium"
+              style={{ marginTop: theme.spacing.md }}
             >
-              <Text
-                variant="bodyXSmallRegular"
-                color={hasChanges ? "onTertiary" : "onSurfaceVariant"}
-              >
-                {hasChanges ? "Modified" : "Unchanged"}
-              </Text>
-            </View>
+              Uploading Images...
+            </Text>
           </View>
-        </View>
+        </Modal>
       )}
-
-      {/* Help Text */}
-      <View
-        style={{
-          marginTop: theme.spacing.md,
-          padding: theme.spacing.sm,
-          backgroundColor: "transparent",
-        }}
-      >
-        <Text
-          variant="bodyXSmallRegular"
-          color="onSurfaceVariant"
-          style={{ textAlign: "center" }}
-        >
-          Changes are automatically validated. Save to update your recipe.
-        </Text>
-      </View>
     </Scroll>
   );
 };

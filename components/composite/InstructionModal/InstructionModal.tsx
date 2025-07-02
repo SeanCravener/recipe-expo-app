@@ -12,6 +12,10 @@ interface InstructionModalProps {
   initialValue?: { content: string; "image-url": string };
   isEdit?: boolean;
   stepNumber?: number;
+  // New props for deferred upload
+  deferUpload?: boolean;
+  onImagePicked?: (uri: string) => void;
+  localImageUri?: string;
 }
 
 export const InstructionModal: React.FC<InstructionModalProps> = ({
@@ -22,6 +26,9 @@ export const InstructionModal: React.FC<InstructionModalProps> = ({
   initialValue = { content: "", "image-url": "" },
   isEdit = false,
   stepNumber,
+  deferUpload = false,
+  onImagePicked,
+  localImageUri,
 }) => {
   const { theme } = useTheme();
   const [content, setContent] = useState(initialValue.content);
@@ -151,6 +158,9 @@ export const InstructionModal: React.FC<InstructionModalProps> = ({
             height={160}
             helpText="Add a photo to help visualize this step"
             placeholder="Add Step Image"
+            deferUpload={deferUpload}
+            onImagePicked={onImagePicked}
+            localImageUri={localImageUri}
           />
         </View>
 
